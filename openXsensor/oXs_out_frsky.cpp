@@ -38,6 +38,7 @@
 extern OXS_MS5611 oXs_MS5611 ;
 extern OXS_VOLTAGE oXs_Voltage ; 
 extern OXS_CURRENT oXs_Current ;
+extern OXS_EAGLETREE oXs_EagleTree ;
 extern OXS_4525 oXs_4525 ;
 extern OXS_SDP3X oXs_sdp3x;
 #if  defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)
@@ -791,6 +792,8 @@ void OXS_OUT::SendFrame1(){
     SendValue( FRSKY_USERDATA_VFAS_NEW ,  (int16_t) (voltageData->mVolt[VFAS_SOURCE - VOLT_1 ].value / 100) ) ; // convert mvolt in 1/10 of volt; in openTx 2.1.x, it is possible to get 1 more decimal using [VFAS_SOURCE - VOLT_1 ].value/10.)+2000);  
 #elif defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(VFAS_SOURCE) &&  ( (VFAS_SOURCE == ADS_VOLT_1) || (VFAS_SOURCE == ADS_VOLT_2) || (VFAS_SOURCE == ADS_VOLT_3) || (VFAS_SOURCE == ADS_VOLT_4)  )
     SendValue( FRSKY_USERDATA_VFAS_NEW ,  (int16_t) (ads_Conv[VFAS_SOURCE - ADS_VOLT_1 ].value / 100) ) ; // convert mvolt in 1/10 of volt; in openTx 2.1.x, it is possible to get 1 more decimal using [VFAS_SOURCE - VOLT_1 ].value/10.)+2000);  
+#elif defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
+	SendValue( FRSKY_USERDATA_VFAS_NEW ,  (int16_t) ( oXs_EagleTree.voltageData.mVoltCellTot / 100 ) ) ;
 #endif
    
 // current
@@ -798,6 +801,8 @@ void OXS_OUT::SendFrame1(){
     SendValue( FRSKY_USERDATA_CURRENT ,  (int16_t) ( oXs_Current.currentData.milliAmps.value / 100 ) ) ;
 #elif defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)
     SendValue( FRSKY_USERDATA_CURRENT ,  (int16_t) ( oXs_ads1115.adsCurrentData.milliAmps.value / 100 ) ) ;
+#elif defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
+	SendValue( FRSKY_USERDATA_CURRENT ,  (int16_t) ( oXs_EagleTree.currentData.milliAmps.value / 100 ) ) ;
 #endif
 
 // fuel                                     
@@ -809,6 +814,8 @@ void OXS_OUT::SendFrame1(){
    
 // RPM
 #if defined(MEASURE_RPM) 
+    SendValue( FRSKY_USERDATA_RPM , (int16_t) sport_rpm.value ) ; 
+#elif defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
     SendValue( FRSKY_USERDATA_RPM , (int16_t) sport_rpm.value ) ; 
 #endif
 

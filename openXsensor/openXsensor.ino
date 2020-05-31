@@ -10,6 +10,7 @@
 #include "oXs_4525.h"
 #include "oXs_sdp3x.h"
 #include "oXs_ads1115.h"
+#include "oXs_eagletree.h"
 #include "oXs_curr.h"
 #include "oXs_out_frsky.h"
 #include "oXs_out_multiplex.h"
@@ -356,7 +357,7 @@ bool prevLowVoltage = false ;
 volatile bool RpmSet  ;
 volatile uint16_t RpmValue ;
 unsigned long lastRpmMillis ;
-#if defined (MEASURE_RPM)
+#if defined (MEASURE_RPM) || (defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES))
   struct ONE_MEASUREMENT sport_rpm ;
 #endif
 
@@ -445,6 +446,14 @@ extern uint8_t  volatile TxDataIdx ;
     OXS_CURRENT oXs_Current(PIN_CURRENTSENSOR,Serial);
   #else
     OXS_CURRENT oXs_Current(PIN_CURRENTSENSOR);
+  #endif //DEBUG
+#endif
+
+#if defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
+  #ifdef DEBUG  
+    OXS_EAGLETREE oXs_EagleTree(Serial);
+  #else
+    OXS_EAGLETREE oXs_EagleTree(0);
   #endif //DEBUG
 #endif
 
@@ -569,6 +578,12 @@ void setup(){
 #if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
   oXs_Current.setupCurrent( );
   oXs_Out.currentData=&oXs_Current.currentData;
+#endif
+
+#if defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
+  oXs_EagleTree.setup();
+  oXs_Out.currentData=&oXs_EagleTree.currentData;
+  oXs_Out.voltageData=&oXs_EagleTree.voltageData; 
 #endif
 
 #if defined (VARIO) &&  defined ( AIRSPEED_IS_USED) 
@@ -878,6 +893,10 @@ void readSensors() {
 #if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
     oXs_Current.readSensor() ; // Do not perform calculation if there is less than 2000 usec before MS5611 ADC is available =  (9000 - 2000)/2
 #endif             // End defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
+
+#if defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
+  oXs_EagleTree.readSensor();
+#endif
 
 #ifdef GPS_INSTALLED
 #ifdef DEBUG_ENTER_READSENSORS

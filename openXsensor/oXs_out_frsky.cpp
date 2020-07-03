@@ -601,6 +601,11 @@ void OXS_OUT::sendSportData()
       sport_currentData.value = oXs_Current.currentData.milliAmps.value  / 100 ;
       sport_currentData.available = true ;
     }  
+    if ( oXs_Current.currentData.consumedMilliAmps.available) {
+      oXs_Current.currentData.consumedMilliAmps.available = false ; 
+      sport_currentData.value = oXs_Current.currentData.milliAmps.value  / 100 ;
+      sport_currentData.available = true ;
+    }  
 #elif defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)
     if ( oXs_ads1115.adsCurrentData.milliAmps.available ) {
       oXs_ads1115.adsCurrentData.milliAmps.available = false ;
@@ -798,11 +803,13 @@ void OXS_OUT::SendFrame1(){
    
 // current
 #if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
-    SendValue( FRSKY_USERDATA_CURRENT ,  (int16_t) ( oXs_Current.currentData.milliAmps.value / 100 ) ) ;
+    SendValue( FRSKY_USERDATA_CURRENT,  (int16_t) ( oXs_Current.currentData.milliAmps.value / 100 ) ) ;
+	SendValue( FRSKY_USERDATA_RPM,      (int16_t) ( oXs_Current.currentData.consumedMilliAmps.value ) ) ; 
 #elif defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)
-    SendValue( FRSKY_USERDATA_CURRENT ,  (int16_t) ( oXs_ads1115.adsCurrentData.milliAmps.value / 100 ) ) ;
+    SendValue( FRSKY_USERDATA_CURRENT,  (int16_t) ( oXs_ads1115.adsCurrentData.milliAmps.value / 100 ) ) ;
 #elif defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
-	SendValue( FRSKY_USERDATA_CURRENT ,  (int16_t) ( oXs_EagleTree.currentData.milliAmps.value / 100 ) ) ;
+	SendValue( FRSKY_USERDATA_CURRENT,  (int16_t) ( oXs_EagleTree.currentData.milliAmps.value / 100 ) ) ;
+    SendValue( FRSKY_USERDATA_RPM,      (int16_t) ( sport_rpm.value ) ) ; 
 #endif
 
 // fuel                                     
@@ -814,8 +821,6 @@ void OXS_OUT::SendFrame1(){
    
 // RPM
 #if defined(MEASURE_RPM) 
-    SendValue( FRSKY_USERDATA_RPM , (int16_t) sport_rpm.value ) ; 
-#elif defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
     SendValue( FRSKY_USERDATA_RPM , (int16_t) sport_rpm.value ) ; 
 #endif
 

@@ -38,7 +38,7 @@
 extern OXS_MS5611 oXs_MS5611 ;
 extern OXS_VOLTAGE oXs_Voltage ; 
 extern OXS_CURRENT oXs_Current ;
-extern OXS_EAGLETREE oXs_EagleTree ;
+//extern OXS_EAGLETREE oXs_EagleTree ;
 extern OXS_4525 oXs_4525 ;
 extern OXS_SDP3X oXs_sdp3x;
 #if  defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)
@@ -50,15 +50,15 @@ extern unsigned long millis( void ) ;
 extern void delay(unsigned long ms) ;
 
 //used only by Sport protocol
-extern uint8_t  volatile  sportData[7] ;
-uint8_t  volatile TxData[8] ;
-uint8_t  volatile TxDataIdx ;
-uint8_t rxStuff ;
-extern uint8_t LastRx ;
-static volatile uint8_t prevLastRx ;           // just for testing
+//extern uint8_t  volatile  sportData[7] ;
+//uint8_t  volatile TxData[8] ;
+//uint8_t  volatile TxDataIdx ;
+//uint8_t rxStuff ;
+//extern uint8_t LastRx ;
+//static volatile uint8_t prevLastRx ;           // just for testing
 
-uint8_t volatile sportDataLock ;
-extern uint8_t volatile sendStatus ;
+//uint8_t volatile sportDataLock ;
+//extern uint8_t volatile sendStatus ;
 #if defined(VFAS_SOURCE) 
   struct ONE_MEASUREMENT vfas ; 
 #endif
@@ -204,12 +204,12 @@ void OXS_OUT::sendData() {
 
 #if defined( PROTOCOL ) &&  ( ( PROTOCOL == FRSKY_SPORT ) || ( PROTOCOL == FRSKY_SPORT_HUB ) )
 
-volatile uint8_t idToReply ;                                                     // each bit (0..5) reports (set to 1) if oXs has to reply to a pooling on a specific Id (this has been added because oXs has to reply with all 0x00 when he has not yet data available 
-volatile uint8_t frskyStatus = 0x3F  ;                                                   //Status of SPORT protocol saying if data is to load in work field (bit 0...5 are used for the 6 sensorId), initially all data are to be loaded
-uint8_t currFieldIdx[6] = { 0 , 2, 5 , 10 , 15 , 19 } ;                          // per sensor, say which field has been loaded the last time (so next time, we have to search from the next one)
-const uint8_t fieldMinIdx[7]  = { 0 , 2, 5 , 10 , 15 , 19 , 22 } ;                     // per sensor, say the first field index ; there is one entry more in the array to know the last index
-const uint8_t fieldId[22] = { 0x10 , 0x11 , 0x30 , 0x30 , 0x30 , 0x21 , 0x20 , 0x60 ,0x90, 0x91 , 0x80, 0x80 , 0x82 , 0x83 , 0x84 , 0x50 , 0x40 , 0x41 , 0xA0 , 0x70 , 0x71 , 0x72 } ; //fieldID to send to Tx (to shift 4 bits to left
-struct ONE_MEASUREMENT * p_measurements[22] ;      // array of 22 pointers (each pointer point to a structure containing a byte saying if a value is available and to the value.
+//volatile uint8_t idToReply ;                                                     // each bit (0..5) reports (set to 1) if oXs has to reply to a pooling on a specific Id (this has been added because oXs has to reply with all 0x00 when he has not yet data available 
+//volatile uint8_t frskyStatus = 0x3F  ;                                                   //Status of SPORT protocol saying if data is to load in work field (bit 0...5 are used for the 6 sensorId), initially all data are to be loaded
+//uint8_t currFieldIdx[6] = { 0 , 2, 5 , 10 , 15 , 19 } ;                          // per sensor, say which field has been loaded the last time (so next time, we have to search from the next one)
+//const uint8_t fieldMinIdx[7]  = { 0 , 2, 5 , 10 , 15 , 19 , 22 } ;                     // per sensor, say the first field index ; there is one entry more in the array to know the last index
+//const uint8_t fieldId[22] = { 0x10 , 0x11 , 0x30 , 0x30 , 0x30 , 0x21 , 0x20 , 0x60 ,0x90, 0x91 , 0x80, 0x80 , 0x82 , 0x83 , 0x84 , 0x50 , 0x40 , 0x41 , 0xA0 , 0x70 , 0x71 , 0x72 } ; //fieldID to send to Tx (to shift 4 bits to left
+//struct ONE_MEASUREMENT * p_measurements[22] ;      // array of 22 pointers (each pointer point to a structure containing a byte saying if a value is available and to the value.
 // There are 20 possible fields to transmit in SPORT                                                                                                                            
 // They are grouped per sensor ID
 // Sensor 0 start from index = 0 and contains Alt + Vspeed
@@ -219,12 +219,12 @@ struct ONE_MEASUREMENT * p_measurements[22] ;      // array of 22 pointers (each
 // Sensor 4 start from index = 13 and contains rpm, T1, T2, airspeed
 // Sensor 5 start from index = 17 and contains accX , accY, accZ
 
-int32_t dataValue[6] ;   // keep for each sensor id the next value to be sent
-uint8_t dataId[6] ;      // keep for each sensor id the Id of next field to be sent
-uint8_t sensorSeq  ;
-uint8_t sensorIsr  ;
+//int32_t dataValue[6] ;   // keep for each sensor id the next value to be sent
+//uint8_t dataId[6] ;      // keep for each sensor id the Id of next field to be sent
+//uint8_t sensorSeq  ;
+//uint8_t sensorIsr  ;
 
-struct ONE_MEASUREMENT no_data = { 0, 0 } ; 
+//struct ONE_MEASUREMENT no_data = { 0, 0 } ; 
 
 void initMeasurement() {
 // pointer to Altitude
@@ -804,7 +804,7 @@ void OXS_OUT::SendFrame1(){
 // current
 #if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
     SendValue( FRSKY_USERDATA_CURRENT,  (int16_t) ( oXs_Current.currentData.milliAmps.value / 100 ) ) ;
-	SendValue( FRSKY_USERDATA_RPM,      (int16_t) ( oXs_Current.currentData.consumedMilliAmps.value ) ) ; 
+	SendValue( FRSKY_USERDATA_RPM,      (int16_t) ( oXs_Current.currentData.consumedMilliAmps.value  ) ) ; 
 #elif defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)
     SendValue( FRSKY_USERDATA_CURRENT,  (int16_t) ( oXs_ads1115.adsCurrentData.milliAmps.value / 100 ) ) ;
 #elif defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
@@ -983,7 +983,7 @@ void OXS_OUT::SendFrame1(){
 
 #ifdef GPS_INSTALLED
 //======================================================================================================Send Frame 2 via serial used for GPS
-void OXS_OUT::SendFrame2(){
+/*void OXS_OUT::_SendFrame2(){
   static uint8_t hubGpsCount ;
   uint32_t absLongLat ;
   uint32_t decimalPartOfDegree ;
@@ -1040,7 +1040,7 @@ void OXS_OUT::SendFrame2(){
      printer->println(" "); 
 #endif
   
-}
+}*/
 #endif // end of GPS_INSTALLED
 
 

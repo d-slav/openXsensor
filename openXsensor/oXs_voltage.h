@@ -6,34 +6,36 @@
 #include "oXs_config_advanced.h"
 #include "oXs_config_macros.h"
 
+#define NUM_VOLTAGES 1
+
 struct VOLTAGEDATA {
 //  bool available;    // to remove afterward
   uint16_t vrefMilliVolts;          // in mV the internal measured voltage Reference ; to remove afterward
 
-  struct ONE_MEASUREMENT mVolt[6] ;  // in mV 
-//  int32_t mVolt[6] ;             // in mV 
-//  bool mVoltAvailable[6] ;
+  struct ONE_MEASUREMENT mVolt[NUM_VOLTAGES] ;  // in mV 
+//  int32_t mVolt[NUM_VOLTAGES] ;             // in mV 
+//  bool mVoltAvailable[NUM_VOLTAGES] ;
   
-  byte mVoltPin[6] ;            // Arduino pin number to use to read each voltage (See hardware setting in oXs_config.h)  
-  int offset[6] ;               // offset to apply while converting ADC to millivolt (See setting in oXs_config.h)  
-  float mVoltPerStep[6] ;       // rate to apply while converting ADC to millivolt (See setting in oXs_config.h)  
+  byte mVoltPin[NUM_VOLTAGES] ;            // Arduino pin number to use to read each voltage (See hardware setting in oXs_config.h)  
+  int offset[NUM_VOLTAGES] ;               // offset to apply while converting ADC to millivolt (See setting in oXs_config.h)  
+  float mVoltPerStep[NUM_VOLTAGES] ;       // rate to apply while converting ADC to millivolt (See setting in oXs_config.h)  
 
   bool atLeastOneVolt ;         // true if there is at least one voltage to measure (added because otherwise a while in cpp never end)
   
-  int32_t sumVoltage[6] ;       // used to calculate average voltage     
+  int32_t sumVoltage[NUM_VOLTAGES] ;       // used to calculate average voltage     
 
-  uint8_t maxNumberOfCells ;    // used to fill in the max number of cells
-  uint32_t mVoltCell[6] ;
-  bool mVoltCell_Available [6];
-  uint32_t mVoltCellMin ;
-  bool mVoltCellMin_Available ;
-   uint32_t mVoltCellTot ;
-  bool mVoltCellTot_Available ;
+//  uint8_t maxNumberOfCells ;    // used to fill in the max number of cells
+//  uint32_t mVoltCell[NUM_VOLTAGES] ;
+//  bool mVoltCell_Available [NUM_VOLTAGES];
+//  uint32_t mVoltCellMin ;
+//  bool mVoltCellMin_Available ;
+//   uint32_t mVoltCellTot ;
+ // bool mVoltCellTot_Available ;
  
 #if defined(PROTOCOL) && ( (PROTOCOL == FRSKY_SPORT) || ( PROTOCOL == FRSKY_HUB ) || (PROTOCOL == FRSKY_SPORT_HUB ) ) //if Frsky protocol is used  
-struct ONE_MEASUREMENT mVoltCell_1_2 ; 
-struct ONE_MEASUREMENT mVoltCell_3_4 ;  
-struct ONE_MEASUREMENT mVoltCell_5_6 ;  
+//struct ONE_MEASUREMENT mVoltCell_1_2 ; 
+//struct ONE_MEASUREMENT mVoltCell_3_4 ;  
+//struct ONE_MEASUREMENT mVoltCell_5_6 ;  
 #endif
 };
 

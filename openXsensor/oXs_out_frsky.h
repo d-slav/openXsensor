@@ -215,8 +215,8 @@ class OXS_OUT {
     OXS_OUT(uint8_t pinTx);
 #endif
     VARIODATA* varioData ;
-    VARIODATA* varioData_2 ;
-    AIRSPEEDDATA* airSpeedData ;
+    //VARIODATA* varioData_2 ;
+    //AIRSPEEDDATA* airSpeedData ;
     CURRENTDATA* currentData ;
     VOLTAGEDATA* voltageData ;
  //   uint8_t currentValueType ; //e.g. = ALTIMETER, VERTICAL_SPEED, = field_Id to transmit  
@@ -330,10 +330,10 @@ extern bool GPS_fix ; // true if gps data are available.
 #endif // End of GPS_INSTALLED
 
 //******************* part used for handling of UART with Receiver ************************
-extern volatile uint8_t debug01 ;
-extern volatile uint8_t debug02 ;
-extern volatile uint8_t debug03 ;
-extern volatile uint8_t debug04 ;
+//extern volatile uint8_t debug01 ;
+//extern volatile uint8_t debug02 ;
+//extern volatile uint8_t debug03 ;
+//extern volatile uint8_t debug04 ;
 
 
 // used by FRSKY_SPORT protocol
@@ -348,8 +348,8 @@ void setHubNewData(  ) ;
 void startHubTransmit( void ) ;
 
 // used in all protocol   // not sure it is used here
-extern volatile bool RpmSet ;
-extern volatile uint16_t RpmValue ;
+//extern volatile bool RpmSet ;
+//extern volatile uint16_t RpmValue ;
 
 extern volatile bool sportAvailable ;
 
@@ -469,6 +469,8 @@ uint32_t millis( void ) ;
 
 #define SET_TX_PIN( )    ( TRXPORT |= ( 1 << PIN_SERIALTX ) )
 #define CLEAR_TX_PIN( )  ( TRXPORT &= ~( 1 << PIN_SERIALTX ) )
+//#define SET_TX_PIN( )    ( TRXPORT &= ~( 1 << PIN_SERIALTX ) )
+//#define CLEAR_TX_PIN( )  ( TRXPORT |= ( 1 << PIN_SERIALTX ) )
 
 #if PIN_SERIALTX == 7
 #define GET_RX_PIN( )    ( ACSR & ( 1 << ACO ) )

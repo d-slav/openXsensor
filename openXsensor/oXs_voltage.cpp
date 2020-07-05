@@ -1,7 +1,7 @@
 #include "oXs_voltage.h"
  
 #ifdef DEBUG
-//#define DEBUGNEWVALUE
+#define DEBUGNEWVALUE
 //#define DEBUGDELAY
 //#define DEBUGCELLCALCULATION
 //#define DEBUGLOWVOLTAGE
@@ -39,29 +39,29 @@ void OXS_VOLTAGE::setupVoltage( void ) {
   analogReference(EXTERNAL) ;
 #endif
 #ifdef PIN_VOLTAGE  
-  uint8_t tempPin[6 ] = { PIN_VOLTAGE };
+  uint8_t tempPin[NUM_VOLTAGES] = { PIN_VOLTAGE };
 #else
-  uint8_t tempPin[6 ] = { 8 , 8 , 8 , 8 , 8 , 8 } ;
+  uint8_t tempPin[NUM_VOLTAGES] = { 8 , 8 , 8 , 8 , 8 , 8 } ;
 #endif  
 #ifdef RESISTOR_TO_GROUND 
-  float tempResistorToGround[6] = { RESISTOR_TO_GROUND } ;
+  float tempResistorToGround[NUM_VOLTAGES] = { RESISTOR_TO_GROUND } ;
 #else
-  float tempResistorToGround[6] = { 0 , 0 , 0 , 0 , 0 , 0 } ;
+  float tempResistorToGround[NUM_VOLTAGES] = { 0 , 0 , 0 , 0 , 0 , 0 } ;
 #endif
 #ifdef RESISTOR_TO_VOLTAGE  
-  float tempResistorToVoltage[6] = { RESISTOR_TO_VOLTAGE } ;
+  float tempResistorToVoltage[NUM_VOLTAGES] = { RESISTOR_TO_VOLTAGE } ;
 #else
-  float tempResistorToVoltage[6] = { 0 , 0 , 0 , 0 , 0 , 0 } ;
+  float tempResistorToVoltage[NUM_VOLTAGES] = { 0 , 0 , 0 , 0 , 0 , 0 } ;
 #endif
 #ifdef OFFSET_VOLTAGE  
-  int tempOffsetVoltage[6] = { OFFSET_VOLTAGE} ;
+  float tempOffsetVoltage[NUM_VOLTAGES] = { OFFSET_VOLTAGE} ;
 #else 
-  int tempOffsetVoltage[6] =  { 0 , 0 , 0 , 0 , 0 , 0 } ;
+  float tempOffsetVoltage[NUM_VOLTAGES] =  { 0 , 0 , 0 , 0 , 0 , 0 } ;
 #endif
 #ifdef SCALE_VOLTAGE   
-  float tempScaleVoltage[6] = { SCALE_VOLTAGE }  ;
+  float tempScaleVoltage[NUM_VOLTAGES] = { SCALE_VOLTAGE }  ;
 #else
-  float tempScaleVoltage[6] =  { 1 , 1 , 1 , 1 , 1 , 1 } ;
+  float tempScaleVoltage[NUM_VOLTAGES] =  { 1 , 1 , 1 , 1 , 1 , 1 } ;
 #endif
  
 #if defined(USE_INTERNAL_REFERENCE) && defined(REFERENCE_VOLTAGE) && REFERENCE_VOLTAGE < 2000
@@ -89,7 +89,7 @@ void OXS_VOLTAGE::setupVoltage( void ) {
   printer->println(tempRef);
 #endif
   voltageData.atLeastOneVolt = false ;
-  for (int cntInit = 0 ; cntInit < 6 ; cntInit++) {
+  for (int cntInit = 0 ; cntInit < NUM_VOLTAGES ; cntInit++) {
     if ( tempPin[ cntInit ] < 8 ) {
       voltageData.mVoltPin[cntInit] =  tempPin[ cntInit ] ;
       // pinMode(voltageData.mVoltPin[cntInit],INPUT);  // this instruction was wrong because pinMode need A0... A7 for analog pin - and not 0...7
@@ -157,11 +157,11 @@ void OXS_VOLTAGE::voltageNrIncrease() {
   //static int32_t previousMVolt ;  
   
   voltageNr++;
-  if(voltageNr == 6) { 
+  if(voltageNr == NUM_VOLTAGES) { 
       voltageNr = 0 ;
       cnt++;
       if(millis() > ( lastVoltMillis + 500) ){   // calculate average only once every 500 msec 
-        for (uint8_t cntVolt = 0 ; cntVolt < 6 ; cntVolt++) {      
+        for (uint8_t cntVolt = 0 ; cntVolt < NUM_VOLTAGES ; cntVolt++) {      
           if ( voltageData.mVoltPin[cntVolt] < 8) {
             voltageData.mVolt[cntVolt].value = round( ((float) voltageData.sumVoltage[cntVolt]  * voltageData.mVoltPerStep[cntVolt] ) / (float) cnt  ) + voltageData.offset[cntVolt];
 //            voltageData.mVolt[cntVolt].value = (voltageData.sumVoltage[cntVolt] / cnt  * voltageData.mVoltPerStep[cntVolt] ) + voltageData.offset[cntVolt];

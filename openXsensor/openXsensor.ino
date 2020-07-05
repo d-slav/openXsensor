@@ -259,10 +259,10 @@ boolean gliderRatioPpmOn = false ;
   extern uint8_t ads_cntDifPressureAdc_0 ;
 #endif
 
-uint16_t ppmus ; // duration of ppm in usec
-int prevPpm ; //^previous ppm
-struct ONE_MEASUREMENT ppm ; // duration of pulse in range -100 / + 100 ; can exceed those limits
-struct ONE_MEASUREMENT newPpm ; // keep the ppm value received via sport before it is processed in other part of the code
+//uint16_t ppmus ; // duration of ppm in usec
+//int prevPpm ; //^previous ppm
+//struct ONE_MEASUREMENT ppm ; // duration of pulse in range -100 / + 100 ; can exceed those limits
+//struct ONE_MEASUREMENT newPpm ; // keep the ppm value received via sport before it is processed in other part of the code
 
 #if defined ( A_FLOW_SENSOR_IS_CONNECTED ) && ( A_FLOW_SENSOR_IS_CONNECTED == YES)  // we will use interrupt PCINT0 
   volatile uint16_t flowMeterCnt ;            // counter of pin change connected to the flow sensor (increased in the interrupt. reset every X sec when flow is processed)
@@ -334,14 +334,14 @@ struct ONE_MEASUREMENT newPpm ; // keep the ppm value received via sport before 
 #endif
 
 
-    uint16_t sequenceMaxNumber[10] ;  // this array contains the number of events of each sequence
-    uint8_t * sequencePointer[10] ; // this is an array of pointers; each pointer refers to the first element of a 2 dim array.
+//    uint16_t sequenceMaxNumber[10] ;  // this array contains the number of events of each sequence
+//    uint8_t * sequencePointer[10] ; // this is an array of pointers; each pointer refers to the first element of a 2 dim array.
     
-    uint8_t *seqRef  ;  // seqRef contains a pointer to the first item of the selected sequence array
-    uint16_t seqMax ; // number of sequences in the selected array
-    uint8_t seqState ; // say if the sequence is starting (0), running (1) or stopped (2)
-    uint16_t seqStep ;  // says the current step in the sequence , first step = 0 ;
-    uint8_t sequenceOutputs = SEQUENCE_OUTPUTS & 0b00111111 ; // Mask to define which pin of portB are outputs
+//    uint8_t *seqRef  ;  // seqRef contains a pointer to the first item of the selected sequence array
+//    uint16_t seqMax ; // number of sequences in the selected array
+//    uint8_t seqState ; // say if the sequence is starting (0), running (1) or stopped (2)
+//    uint16_t seqStep ;  // says the current step in the sequence , first step = 0 ;
+//    uint8_t sequenceOutputs = SEQUENCE_OUTPUTS & 0b00111111 ; // Mask to define which pin of portB are outputs
 #ifdef SEQUENCE_UNIT
     uint16_t sequenceUnit = SEQUENCE_UNIT * 10 ; 
 #else
@@ -349,27 +349,27 @@ struct ONE_MEASUREMENT newPpm ; // keep the ppm value received via sport before 
 #endif // SEQUENCE_UNIT
 #endif // end of SEQUENCE_OUTPUTS
 
-int8_t prevPpmMain = -100 ; // this value is unusual; so it will forced a change at first call
-bool lowVoltage = false ;
-bool prevLowVoltage = false ;
+//int8_t prevPpmMain = -100 ; // this value is unusual; so it will forced a change at first call
+//bool lowVoltage = false ;
+//bool prevLowVoltage = false ;
 //uint32_t currentLoopMillis ;
 
-volatile bool RpmSet  ;
-volatile uint16_t RpmValue ;
-unsigned long lastRpmMillis ;
+//volatile bool RpmSet  ;
+//volatile uint16_t RpmValue ;
+//unsigned long lastRpmMillis ;
 #if defined (MEASURE_RPM) || (defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES))
   struct ONE_MEASUREMENT sport_rpm ;
 #endif
 
-int PWRValue; // calculation field for Vertical speed on PWR
-unsigned long lastMillisPWR ;
+//int PWRValue; // calculation field for Vertical speed on PWR
+//unsigned long lastMillisPWR ;
 
 float actualPressure  ; // default pressure in pascal; to actualise if vario exist; is used in airspeed calculation.
 int sensitivityPpmMapped ;
 int compensationPpmMapped ;
-struct ONE_MEASUREMENT test1 ; // used in order to test the transmission of any value
-struct ONE_MEASUREMENT test2 ; // used in order to test the transmission of any value
-struct ONE_MEASUREMENT test3 ; // used in order to test the transmission of any value
+//struct ONE_MEASUREMENT test1 ; // used in order to test the transmission of any value
+//struct ONE_MEASUREMENT test2 ; // used in order to test the transmission of any value
+//struct ONE_MEASUREMENT test3 ; // used in order to test the transmission of any value
 //int32_t test1Value ;// used in order to test the transmission of any value
 //bool test1ValueAvailable ;
 //int32_t test2Value ;// used in order to test the transmission of any value
@@ -381,8 +381,8 @@ uint8_t selectedVario = VARIO_PRIMARY ; // identify the vario to be used when sw
 #endif
 
 // to read SPORT (for Frsky protocol
-extern uint8_t  volatile TxData[8] ;
-extern uint8_t  volatile TxDataIdx ;
+//extern uint8_t  volatile TxData[8] ;
+//extern uint8_t  volatile TxDataIdx ;
 
 
 //******************* Create instances of the used classes ******************************************
@@ -640,7 +640,7 @@ void setup(){
   PCICR |= (1<<PCIE0)   ;     // enable pin change interrupt 0 so on pin from PB0 to PB7 = e.g. pins 8 to 13 to collect pin changes for flow sensor 
 #endif
 
-  RpmSet = false ;
+//  RpmSet = false ;
 //  RpmValue = 0 ;
 //  RpmAvailable = false ;
 

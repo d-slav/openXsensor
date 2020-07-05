@@ -3,7 +3,7 @@
 #if defined( ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
 
 #ifdef DEBUG
-//#define DEBUGCURRENT
+#define DEBUGCURRENT
 #endif
 
 extern unsigned long micros( void ) ;
@@ -27,7 +27,7 @@ OXS_CURRENT::OXS_CURRENT(uint8_t pinCurrent)
 // **************** Setup the Current sensor *********************
 void OXS_CURRENT::setupCurrent( ) {
   uint16_t tempRef ; 
-  float currentDivider = 1.0 ;
+  //float currentDivider = 1.0 ;
 #ifdef USE_INTERNAL_REFERENCE   
   analogReference(INTERNAL) ;
 #elif defined(USE_EXTERNAL_REFERENCE)
@@ -52,13 +52,13 @@ void OXS_CURRENT::setupCurrent( ) {
 #else 
   tempRef = 5000 ;
 #endif  
-#if defined(RESISTOR_TO_GROUND_FOR_CURRENT) && defined(RESISTOR_TO_CURRENT_SENSOR)
+/*#if defined(RESISTOR_TO_GROUND_FOR_CURRENT) && defined(RESISTOR_TO_CURRENT_SENSOR)
   if ( RESISTOR_TO_GROUND_FOR_CURRENT > 0 && RESISTOR_TO_CURRENT_SENSOR > 0) {
     currentDivider = 1.0 * (RESISTOR_TO_GROUND_FOR_CURRENT + RESISTOR_TO_CURRENT_SENSOR ) / RESISTOR_TO_GROUND_FOR_CURRENT ;
   }
-#endif 
-  offsetCurrentSteps =  1023.0 * MVOLT_AT_ZERO_AMP / tempRef / currentDivider;
-  mAmpPerStep =  currentDivider * tempRef / MVOLT_PER_AMP / 1.023 ; 
+#endif*/ 
+  offsetCurrentSteps =  1023.0 * MVOLT_AT_ZERO_AMP / tempRef;// / currentDivider;
+  mAmpPerStep =  /*currentDivider **/ tempRef / MVOLT_PER_AMP / 1.023 ; 
 
   currentData.milliAmps.available = false;
   currentData.consumedMilliAmps.available = false;
@@ -87,7 +87,7 @@ void OXS_CURRENT::readSensor() {
 //  static int cntMAmp =0;
   static unsigned long lastCurrentMillis = millis() ; 
 //  static unsigned long UpdateMs=0;
-  static unsigned long milliTmp = millis() ;
+  /*static*/ unsigned long milliTmp = millis() ;
 #ifdef USE_INTERNAL_REFERENCE
   ADMUX = _BV(REFS1) | _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1) | _BV(MUX0); // binary = 11 00 1111 (11 = use internal VRef as max, 1111 = measure ground level)
 #elif defined(USE_EXTERNAL_REFERENCE)
@@ -105,7 +105,7 @@ void OXS_CURRENT::readSensor() {
   //currentData.sumCurrent += analogRead(_pinCurrent) ; 
   sumCurrent += analogRead(_pinCurrent) ; 
   cnt++ ;
-  milliTmp = millis() ;
+  //milliTmp = millis() ;
   if(  ( milliTmp - lastCurrentMillis) > 200 ) {   // calculate average once per 200 millisec
       currentData.milliAmps.value = ((sumCurrent / cnt) - offsetCurrentSteps ) * mAmpPerStep ;
 //      if (currentData.milliAmps.value < 0) currentData.milliAmps.value = 0 ;
@@ -114,7 +114,7 @@ void OXS_CURRENT::readSensor() {
 //      if(currentData.maxMilliAmps<currentData.milliAmps)currentData.maxMilliAmps=currentData.milliAmps;
       sumCurrent = 0;
       floatConsumedMilliAmps += ((float) currentData.milliAmps.value) * (milliTmp - lastCurrentMillis ) / 3600.0 /1000.0 ;   // Mike , is this ok when millis() overrun????
-      currentData.consumedMilliAmps.value = (int32_t) floatConsumedMilliAmps ;
+      currentData.consumedMilliAmps.value = (int32_t) floatConsumedMilliAmps;// / 10 ;
       currentData.consumedMilliAmps.available = true ;
       lastCurrentMillis =  milliTmp ;
 #ifdef DEBUGCURRENT

@@ -6,7 +6,7 @@
 #define REFERENCE_VOLTAGE 3300
 
 #define PIN_VOLTAGE  0 , 8 , 8 , 8 , 8 , 8
-#define RESISTOR_TO_GROUND 5.1 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0
+#define RESISTOR_TO_GROUND 13.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0
 #define RESISTOR_TO_VOLTAGE 68.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0
 #define OFFSET_VOLTAGE 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0
 #define SCALE_VOLTAGE 1.0 , 1.0 , 1.0 , 1.0 , 1.0 , 1.0

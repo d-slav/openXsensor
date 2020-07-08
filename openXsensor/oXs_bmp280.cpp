@@ -258,7 +258,8 @@ void OXS_BMP280::calculateVario() {
 //      varioData.averageClimbRateAvailable = true ; // inform readsensors() that a vspeed is available to calculate the average
       // AltitudeAvailable is set to true only once every 100 msec in order to give priority to climb rate on SPORT
       altMillis = millis() ;
-      if (altMillis > nextAltMillis){
+      if (altMillis > nextAltMillis)
+	  {
         nextAltMillis = altMillis + 100 ;
         varioData.absoluteAlt.value = altitude / 100 ; // altitude is in m *10000 and AbsoluteAlt must be in m * 100
         varioData.absoluteAlt.available=true ;  // Altitude is considered as available only after several loop in order to reduce number of transmission on Sport.
@@ -281,25 +282,29 @@ void OXS_BMP280::calculateVario() {
 
       } // end If (altMillis > nextAltMillis)
 #ifdef DEBUGDATA
-      static bool firstPrintAlt = true ;
-      if (firstPrintAlt == true) {
+      /*static bool firstPrintAlt = true ;
+      if (firstPrintAlt == true) 
+	  {
           firstPrintAlt = false ;
 //          printer->println(F( "T,Ra,Sm,A,NC,DS,AHP,ALP,CR2, Temp" )) ;
           printer->println(F( "T,Ra,Alt,vpsd, Alt2, rawVspd, vspd2 , smoothAlt, smoothVspd" )) ;
-      }    
-            printer->print(  pressureMicrosPrev1 ) ; printer->print(",");
-            printer->print(  (float) varioData.rawAltitude  ) ; printer->print(","); // alt is displayed in CM with 2 decimal
- //           printer->print(  expoSmooth ) ;             printer->print(" ,");
-            printer->print( (float) altitude  ) ;             printer->print(" ,");
-            printer->print( varioData.climbRate ) ;            printer->print(" ,"); 
+      } */   
+			printer->print( varioData.relativeAlt.value ) ;            printer->print(" ,"); 
+			//printer->print( varioData.absoluteAlt.value ) ;            printer->print(" ,"); 
+            printer->print( varioData.climbRate.value ) ;              printer->print(" ,"); 
+			
+            //printer->print(  pressureMicrosPrev1 ) ; printer->print(",");
+            //printer->print(  (float) varioData.rawAltitude  ) ; printer->print(","); // alt is displayed in CM with 2 decimal
+            //printer->print(  expoSmooth ) ;             printer->print(" ,");
+            //printer->print( (float) altitude  ) ;             printer->print(" ,");
  //           printer->print( delaySmooth ) ;            printer->print(" ,"); 
  //           printer->print( altitudeHighPass ) ;             printer->print(" ,"); 
  //           printer->print( altitudeLowPass ) ;            printer->print(" ,"); 
- //           printer->print( climbRate2AltFloat ) ;             printer->print(" ,"); 
- //           printer->print( varioData.temperature ) ;
+            //printer->print( climbRate2AltFloat ) ;             printer->print(" ,"); 
+            //printer->print( varioData.temperature ) ;
  //           printer->print( smoothAltitude ) ;            printer->print(" ,"); 
  //           printer->print( rawRateVSpeed ) ;            printer->print(" ,"); 
- //           printer->print( smoothRateVSpeed ) ;            printer->print(" ,"); 
+            //printer->print( smoothRateVSpeed ) ;            printer->print(" ,"); 
  //           printer->print( expoSmooth5611_alt_auto * 1000 ) ;            printer->print(" ,"); 
  //           printer->print( expoSmooth5611_vSpeed_auto * 1000 ) ;            printer->print(" ,"); 
             printer->println( ) ;

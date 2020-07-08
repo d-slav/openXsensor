@@ -35,7 +35,7 @@
 //#define DEBUGWITHFIXVALUE     // for SPORT protocol only; send a value varying continuously (cycling) between min and max value (see code below)
 #endif
 
-extern OXS_MS5611 oXs_MS5611 ;
+extern OXS_BMP280 oXs_MS5611 ;
 extern OXS_VOLTAGE oXs_Voltage ; 
 extern OXS_CURRENT oXs_Current ;
 //extern OXS_EAGLETREE oXs_EagleTree ;

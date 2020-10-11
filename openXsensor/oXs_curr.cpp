@@ -63,6 +63,7 @@ void OXS_CURRENT::setupCurrent( ) {
   currentData.milliAmps.available = false;
   currentData.consumedMilliAmps.available = false;
 //  currentData.sumCurrent = 0 ;
+  filtered = 0.0;
   resetValues();
 #ifdef DEBUG  
   printer->print("Current sensor on pin:");
@@ -103,12 +104,18 @@ void OXS_CURRENT::readSensor() {
   analogRead(_pinCurrent) ; // make a first read to let ADCMux to set up
   delayMicroseconds(200) ; // wait to be sure
   //currentData.sumCurrent += analogRead(_pinCurrent) ; 
-  sumCurrent += analogRead(_pinCurrent) ; 
+  //sumCurrent += analogRead(_pinCurrent) ; 
+  
+  filtered = filtered * 0.99 + analogRead(_pinCurrent) * 0.01;
+  
   cnt++ ;
   //milliTmp = millis() ;
-  if(  ( milliTmp - lastCurrentMillis) > 200 ) {   // calculate average once per 200 millisec
-      currentData.milliAmps.value = ((sumCurrent / cnt) - offsetCurrentSteps ) * mAmpPerStep ;
-//      if (currentData.milliAmps.value < 0) currentData.milliAmps.value = 0 ;
+  if(  ( milliTmp - lastCurrentMillis) > 200 ) 
+  {   // calculate average once per 200 millisec
+      //currentData.milliAmps.value = (((float)sumCurrent / cnt) - offsetCurrentSteps ) * mAmpPerStep ;
+	  currentData.milliAmps.value = (filtered - offsetCurrentSteps) * mAmpPerStep;
+	  
+      if (currentData.milliAmps.value < 0) currentData.milliAmps.value = 0 ;
 	  currentData.milliAmps.available = true ;
 //      if(currentData.minMilliAmps>currentData.milliAmps)currentData.minMilliAmps=currentData.milliAmps;
 //      if(currentData.maxMilliAmps<currentData.milliAmps)currentData.maxMilliAmps=currentData.milliAmps;

@@ -36,6 +36,7 @@ private:
   float mAmpPerStep ; 
   float floatConsumedMilliAmps; // in mA
   int32_t sumCurrent ;
+  float filtered;
 };
 
 #endif // OXS_CURRENT_h

@@ -117,4 +117,3 @@ int mpu_register_tap_cb(void (*func)(unsigned char, unsigned char));
 int get_st_biases(long *gyro, long *accel, unsigned char hw_test)  ; // added by MS
 
 #endif  /* #ifndef _INV_MPU_H_ */
-

@@ -802,5 +802,3 @@ void I2C::lockUp()
 }
 
 I2C I2c = I2C();
-
-

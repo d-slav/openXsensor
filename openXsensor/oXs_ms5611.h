@@ -87,7 +87,3 @@ private:
 
 
 #endif // OXS_MS5611
-
-
-
-

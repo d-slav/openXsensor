@@ -315,8 +315,3 @@ void OXS_BMP280::calculateVario() {
 } // End of calculate Vario
 
 #endif // end of #if defined(SENSOR_IS_BMP280) 
-
-
-
-
-

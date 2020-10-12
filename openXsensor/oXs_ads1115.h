@@ -100,5 +100,3 @@ private:
 
 
 #endif // OXS_ADS1115
-
-

@@ -1,4 +1,6 @@
 #include "oXs_voltage.h"
+#include "EEPROMAnything.h"
+#include "EEPROMConfig.h"
  
 #ifdef DEBUG
 //#define DEBUGNEWVALUE
@@ -30,7 +32,7 @@ OXS_VOLTAGE::OXS_VOLTAGE(uint8_t x)
 void OXS_VOLTAGE::setupVoltage( void ) {
   uint16_t tempRef ;
 #ifdef DEBUG  
-  printer->println("Enter setup voltage");
+//  printer->println("Enter setup voltage");
 #endif
 
 #ifdef USE_INTERNAL_REFERENCE   
@@ -38,31 +40,18 @@ void OXS_VOLTAGE::setupVoltage( void ) {
 #elif defined(USE_EXTERNAL_REFERENCE)
   analogReference(EXTERNAL) ;
 #endif
-#ifdef PIN_VOLTAGE  
+
   uint8_t tempPin[NUM_VOLTAGES] = { PIN_VOLTAGE };
-#else
-  uint8_t tempPin[NUM_VOLTAGES] = { 8 , 8 , 8 , 8 , 8 , 8 } ;
-#endif  
-#ifdef RESISTOR_TO_GROUND 
-  float tempResistorToGround[NUM_VOLTAGES] = { RESISTOR_TO_GROUND } ;
-#else
-  float tempResistorToGround[NUM_VOLTAGES] = { 0 , 0 , 0 , 0 , 0 , 0 } ;
-#endif
-#ifdef RESISTOR_TO_VOLTAGE  
-  float tempResistorToVoltage[NUM_VOLTAGES] = { RESISTOR_TO_VOLTAGE } ;
-#else
-  float tempResistorToVoltage[NUM_VOLTAGES] = { 0 , 0 , 0 , 0 , 0 , 0 } ;
-#endif
-#ifdef OFFSET_VOLTAGE  
-  float tempOffsetVoltage[NUM_VOLTAGES] = { OFFSET_VOLTAGE} ;
-#else 
-  float tempOffsetVoltage[NUM_VOLTAGES] =  { 0 , 0 , 0 , 0 , 0 , 0 } ;
-#endif
-#ifdef SCALE_VOLTAGE   
-  float tempScaleVoltage[NUM_VOLTAGES] = { SCALE_VOLTAGE }  ;
-#else
-  float tempScaleVoltage[NUM_VOLTAGES] =  { 1 , 1 , 1 , 1 , 1 , 1 } ;
-#endif
+
+  float tempResistorToGround;// = { RESISTOR_TO_GROUND } ;
+  float tempResistorToVoltage;// = { RESISTOR_TO_VOLTAGE } ;
+  float tempOffsetVoltage;// = { OFFSET_VOLTAGE} ;
+  float tempScaleVoltage;// = { SCALE_VOLTAGE }  ;
+
+  EEPROM_readAnything(EE_VOLTAGE_RESISTOR_TO_GROUND, tempResistorToGround);
+  EEPROM_readAnything(EE_VOLTAGE_RESISTOR_TO_VOLTAGE, tempResistorToVoltage);
+  EEPROM_readAnything(EE_VOLTAGE_OFFSET_VOLTAGE, tempOffsetVoltage);
+  EEPROM_readAnything(EE_VOLTAGE_SCALE_VOLTAGE, tempScaleVoltage);
  
 #if defined(USE_INTERNAL_REFERENCE) && defined(REFERENCE_VOLTAGE) && REFERENCE_VOLTAGE < 2000
   tempRef = REFERENCE_VOLTAGE  ;
@@ -84,36 +73,27 @@ void OXS_VOLTAGE::setupVoltage( void ) {
   tempRef = 5000 ;
 #endif  
 
-#ifdef DEBUG  
-  printer->print("Reference voltage:");
-  printer->println(tempRef);
-#endif
-  voltageData.atLeastOneVolt = false ;
-  for (int cntInit = 0 ; cntInit < NUM_VOLTAGES ; cntInit++) {
-    if ( tempPin[ cntInit ] < 8 ) {
-      voltageData.mVoltPin[cntInit] =  tempPin[ cntInit ] ;
-      // pinMode(voltageData.mVoltPin[cntInit],INPUT);  // this instruction was wrong because pinMode need A0... A7 for analog pin - and not 0...7
-      voltageData.atLeastOneVolt = true ;
-    } else {
-      voltageData.mVoltPin[cntInit] = 8 ;
+	voltageData.atLeastOneVolt = false ;
+	voltageData.mVoltPin[0] =  tempPin[0] ;
+	voltageData.atLeastOneVolt = true ;
+	
+    voltageData.offset[0] = tempOffsetVoltage * 1000 ;
+    if ( tempResistorToGround > 0 && tempResistorToVoltage > 0 && tempScaleVoltage > 0 ) 
+	{
+      voltageData.mVoltPerStep[0] = tempRef / 1023.0 * ( tempResistorToGround + tempResistorToVoltage ) / tempResistorToGround  * tempScaleVoltage;
     }
-    voltageData.offset[cntInit] = tempOffsetVoltage[ cntInit ] ;
-    if ( tempResistorToGround[cntInit] > 0 && tempResistorToVoltage[cntInit] > 0 && tempScaleVoltage[cntInit] > 0 ) {
-      voltageData.mVoltPerStep[cntInit] = tempRef / 1023.0 * ( tempResistorToGround[cntInit] + tempResistorToVoltage[cntInit] ) / tempResistorToGround[cntInit]  * tempScaleVoltage[cntInit];
-    } else {
-      voltageData.mVoltPerStep[cntInit] = tempRef / 1023.0  * tempScaleVoltage[cntInit];  
+	else 
+	{
+      voltageData.mVoltPerStep[0] = tempRef / 1023.0  * tempScaleVoltage;  
     }
-    voltageData.sumVoltage[cntInit] = 0 ;
-    voltageData.mVolt[cntInit].available = false ; 
+    voltageData.sumVoltage[0] = 0 ;
+    voltageData.mVolt[0].available = false ; 
 #ifdef DEBUG  
-    printer->print("Voltage:"); printer->print( cntInit + 1 );
-    printer->print(" , pin="); printer->print( voltageData.mVoltPin[cntInit] );
-    printer->print(" , offset="); printer->print( voltageData.offset[cntInit] );
-    printer->print("  , mVoltPerStep="); printer->println( voltageData.mVoltPerStep[cntInit] );
+    printer->print("Voltage:");
+    printer->print(" RefVoltage = "); printer->print(tempRef);
+    printer->print(", VoltPerStep = "); printer->print( voltageData.mVoltPerStep[0] );
+    printer->print(", Offset = "); printer->println( voltageData.offset[0] );
 #endif
-    
-  }
-//  voltageData.atLeastOneVoltage = ( voltageData.mVoltPin[0] < 8 || voltageData.mVoltPin[1] < 8 || voltageData.mVoltPin[2] < 8 ||voltageData.mVoltPin[3] < 8 ||voltageData.mVoltPin[4] < 8 || voltageData.mVoltPin[5] < 8 ) ;
 }
 
 
@@ -146,9 +126,9 @@ void OXS_VOLTAGE::readSensor() {
 }      
 
 
-
 // Select next voltage to read ; if all voltages have been read and 500 ms are enlapsed since previous average calculation, calculates the new averages for each voltage 
-void OXS_VOLTAGE::voltageNrIncrease() {
+void OXS_VOLTAGE::voltageNrIncrease() 
+{
   static int cnt = 0;
   static unsigned long lastVoltMillis = millis() ;
 #if defined ( NUMBEROFCELLS ) && (NUMBEROFCELLS > 0)
@@ -157,12 +137,17 @@ void OXS_VOLTAGE::voltageNrIncrease() {
   //static int32_t previousMVolt ;  
   
   voltageNr++;
-  if(voltageNr == NUM_VOLTAGES) { 
+  if(voltageNr == NUM_VOLTAGES) 
+  { 
       voltageNr = 0 ;
       cnt++;
-      if(millis() > ( lastVoltMillis + 500) ){   // calculate average only once every 500 msec 
-        for (uint8_t cntVolt = 0 ; cntVolt < NUM_VOLTAGES ; cntVolt++) {      
-          if ( voltageData.mVoltPin[cntVolt] < 8) {
+      if(millis() > ( lastVoltMillis + 500) )
+	  {
+		  // calculate average only once every 500 msec 
+        for (uint8_t cntVolt = 0 ; cntVolt < NUM_VOLTAGES ; cntVolt++) 
+		{      
+          if ( voltageData.mVoltPin[cntVolt] < 8) 
+		  {
             voltageData.mVolt[cntVolt].value = round( ((float) voltageData.sumVoltage[cntVolt]  * voltageData.mVoltPerStep[cntVolt] ) / (float) cnt  ) + voltageData.offset[cntVolt];
 //            voltageData.mVolt[cntVolt].value = (voltageData.sumVoltage[cntVolt] / cnt  * voltageData.mVoltPerStep[cntVolt] ) + voltageData.offset[cntVolt];
 //            voltageData.mVolt[cntVolt].value = (1 + cntVolt) * 3000 + cntVolt * (millis() & 0xFF)  ; // this is just to test the cell calculation ; !!!!!!!!!!!to be removed

@@ -318,9 +318,3 @@ extern bool GPS_fix ; // true if gps data are available.
 
 #endif // End of JETI
 #endif // OXS_OUT_JETI_h
-
-
-
-
-
-

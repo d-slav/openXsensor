@@ -1,5 +1,3 @@
-
-
 #include "oXs_config_basic.h"
 #include "oXs_config_advanced.h"
 #include "oXs_config_macros.h"
@@ -26,10 +24,9 @@
   #include "oXs_hmc5883.h"
 #endif
   
-#if defined (SAVE_TO_EEPROM ) and ( SAVE_TO_EEPROM == YES ) 
-  #include <EEPROM.h>
-  #include "EEPROMAnything.h"
-#endif
+#include <EEPROM.h>
+#include "EEPROMAnything.h"
+#include "EEPROMConfig.h"
 
 #if  ! defined(PROTOCOL)
     #error The parameter PROTOCOL in config_basic.h is not defined
@@ -147,15 +144,14 @@
 
 #define PIN_LED            13  // The Signal LED (default=13=onboard LED)
 
-
 extern unsigned long micros( void ) ;
 extern unsigned long millis( void ) ;
 //static unsigned long extendedMicros ;
 
-#ifdef DEBUG_BLINK  // this does not require that DEBUG is active.; Use only one of the blink 
+/*#ifdef DEBUG_BLINK  // this does not require that DEBUG is active.; Use only one of the blink 
    //DEBUG_BLINK_MAINLOOP
    //DEBUG_BLINK_CLIMBRATE
-#endif
+#endif*/
 
 #ifdef DEBUG
 //#define DEBUGCOMPENSATEDCLIMBRATE
@@ -252,8 +248,6 @@ boolean gliderRatioPpmOn = false ;
   #endif
 #endif // end of USE_6050
  
-
-
 #if defined(ADS_AIRSPEED_BASED_ON) and (ADS_AIRSPEED_BASED_ON >= ADS_VOLT1) and (ADS_AIRSPEED_BASED_ON <= ADS_VOLT_4)
   extern float ads_sumDifPressureAdc_0 ;
   extern uint8_t ads_cntDifPressureAdc_0 ;
@@ -487,8 +481,9 @@ uint8_t selectedVario = VARIO_PRIMARY ; // identify the vario to be used when sw
 
 
 //******************************************* Setup () *******************************************************
-
-void setup(){
+void setup()
+{
+	
 // set up the UART speed (38400 if GPS installed else 115200)
 #ifdef GPS_INSTALLED
   Serial.begin(38400); // when GPS is used, baudrate is reduced because main loop must have the time to read the received char.
@@ -707,7 +702,12 @@ void setup(){
 //*******************************************************************************************
 //                                Main loop                                               ***
 //*******************************************************************************************
-void loop(){ 
+void loop()
+{ 
+	static unsigned long lastDebugMillis = millis();
+
+	if (Serial.available() > 0)
+		EEPROMConfig_char(Serial.read());
 /*
 uint8_t flagMillis ;
 static uint32_t lastLoop20Millis ;
@@ -749,13 +749,13 @@ if ( currentLoopMillis - lastLoop500Millis > 500 ) {
   //extern volatile uint8_t state ; 
   //Serial.println(state) ;
     // Check if a button has been pressed
-#ifdef PIN_PUSHBUTTON
+/*#ifdef PIN_PUSHBUTTON
 #if defined (VARIO) || defined (VARIO2)
     if (checkFreeTime()) checkButton(); // Do not perform calculation if there is less than 2000 usec before MS5611 ADC is available =  (9000 - 2000)/2
 #else
     checkButton();
 #endif    
-#endif 
+#endif */
 
     // read all sensors
     readSensors(); 
@@ -770,7 +770,17 @@ if ( currentLoopMillis - lastLoop500Millis > 500 ) {
 #endif
 
     // prepare the telemetry data to be sent (nb: data are prepared but not sent)
-    if ( millis() > 1500 ) oXs_Out.sendData(); 
+    if(millis() > 1500)
+		oXs_Out.sendData(); 
+
+	if(millis() > lastDebugMillis)
+	{
+		lastDebugMillis += 500;
+		Serial.print("Voltage = ");
+		Serial.print( oXs_Voltage.voltageData.mVolt[0].value );
+		Serial.print(", Current = ");
+		Serial.println( oXs_Current.currentData.milliAmps.value );
+	}
    
 // PPM Processing = Read the ppm Signal from receiver  or use the SPORT ppm value from readSensors and process it 
 #if defined ( PPM_IS_USED ) 
@@ -822,17 +832,17 @@ if ( currentLoopMillis - lastLoop500Millis > 500 ) {
 #endif  // SEQUENCE_OUTPUTS
 
 // Save Persistant Data To EEProm every 10 seconds
-#if defined (SAVE_TO_EEPROM ) and ( SAVE_TO_EEPROM == YES )
+/*#if defined (SAVE_TO_EEPROM ) and ( SAVE_TO_EEPROM == YES )
   static unsigned long LastEEPromMs=millis();
   if (millis() > LastEEPromMs+10000){ 
     LastEEPromMs=millis();
     SaveToEEProm();
   }
-#endif
+#endif*/
 
-#if defined( A_LOCATOR_IS_CONNECTED )  and ( A_LOCATOR_IS_CONNECTED == YES) 
+/*#if defined( A_LOCATOR_IS_CONNECTED )  and ( A_LOCATOR_IS_CONNECTED == YES) 
   loraHandle() ;
-#endif  
+#endif */ 
 }          // ****************   end of main loop *************************************
 
 
@@ -847,7 +857,8 @@ extern uint16_t i2cPressureError ;
 extern uint16_t i2cTemperatureError ;
 extern uint16_t i2cReadCount ;
 
-void readSensors() {  
+void readSensors() 
+{  
    
 #ifdef AIRSPEED_4525
   oXs_4525.readSensor(); // Read a first time the differential pressure on 4525DO, calculate airspeed; note airspeed is read a second time in the loop in order to reduce response time
@@ -1533,7 +1544,7 @@ void calculateAverages( ){
 
 
 
-#ifdef PIN_PUSHBUTTON   // // ****************** check button
+/*#ifdef PIN_PUSHBUTTON   // // ****************** check button
 void checkButton() {
   static int lastSensorVal=HIGH;
   static unsigned int buttonDownMs;
@@ -1632,7 +1643,7 @@ void Reset10SecButtonPress()
 #endif
 }
 
-#endif
+#endif*/
 
 
 
@@ -1640,7 +1651,7 @@ void Reset10SecButtonPress()
 /****************************************/
 /* SaveToEEProm => save persistant Data */
 /****************************************/
-void SaveToEEProm(){
+/*void SaveToEEProm(){
   static uint8_t caseWriteEeprom = 0;
 #define CASE_MAX_EEPROM 2  // to adapt if thee are more data to save.   
 #ifdef DEBUG
@@ -1679,12 +1690,12 @@ void SaveToEEProm(){
 
 // to do : add values from ads1115 about current consumption; to do also in LoadFromEEprom()
   
-} // end SaveToEEPom
+} // end SaveToEEPom*/
 
 /******************************************/
 /* LoadFromEEProm => load persistant Data */
 /******************************************/
-void LoadFromEEProm(){
+/*void LoadFromEEProm(){
   // Load the last saved value
 #if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
   EEPROM_readAnything( 0 , oXs_Current.currentData.consumedMilliAmps);
@@ -1716,7 +1727,7 @@ void LoadFromEEProm(){
    Serial.println(" ");
   #endif  
 #endif
-}
+}*/
 #endif //SAVE_TO_EEPROM
 
 
@@ -2123,7 +2134,3 @@ int freeRam () {
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
 #endif // End DEBUG
-
-
-
-

@@ -65,5 +65,3 @@ class OXS_VOLTAGE {
 extern bool lowVoltage ;
 
 #endif
-
-

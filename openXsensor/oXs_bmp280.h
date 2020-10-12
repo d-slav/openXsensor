@@ -87,7 +87,3 @@ private:
 
 
 #endif // OXS_BMP280
-
-
-
-

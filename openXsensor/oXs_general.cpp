@@ -309,5 +309,3 @@ void   blinkLed(uint8_t blinkDelay) {
   }  
 }  
 #endif
-
-

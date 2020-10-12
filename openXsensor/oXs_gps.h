@@ -148,6 +148,3 @@ private:
 
 
 #endif // OXS_GPS_h
-
-
-

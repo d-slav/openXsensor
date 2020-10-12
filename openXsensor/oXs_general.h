@@ -85,5 +85,3 @@ extern volatile uint16_t RpmValue ;
 
 
 #endif // end #define OXS_GENERAl_h
-
-

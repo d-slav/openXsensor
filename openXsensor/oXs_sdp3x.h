@@ -60,5 +60,3 @@ extern bool test3ValueAvailable ;
 
 
 #endif // OXS_SDP3X
-
-

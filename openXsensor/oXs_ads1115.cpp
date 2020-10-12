@@ -347,5 +347,3 @@ void OXS_ADS1115::ads_calculate_airspeed( int16_t ads_difPressureAdc ) {
 #endif // end of conditional compiling for calculate airspeed.
 
 #endif // end of #if defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined( ADS_MEASURE) 
-
-

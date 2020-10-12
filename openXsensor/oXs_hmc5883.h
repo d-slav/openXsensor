@@ -66,7 +66,3 @@ boolean read_hmc5883() ;   // return a flag that is true when a new heading is a
 
 
 #endif // OXS_HMC5883_h
-
-
-
-

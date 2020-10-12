@@ -811,5 +811,3 @@ Rainer Schlosshan, основатель проекта.
 * Just fill in test1Value (or 2, 3) with an int32_t and test1ValueAvailable (or 2, 3) with true and add those oXs measurements in the data to be sent section. 
 ************************************************************************************************************************
 //#define DEBUG
-
-

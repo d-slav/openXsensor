@@ -1190,4 +1190,3 @@ Ecrit par par Rainer Schlosshan traduction Thierry ZINK
 * Il suffit de remplir test1.value (ou 2, 3) avec un int32_t et test1.available (ou 2, 3) avec true et ajouter TEST_1, (2 ,3) dans la section qui précise les données à envoyer. 
 ************************************************************************************************************************
 //#define DEBUG
-

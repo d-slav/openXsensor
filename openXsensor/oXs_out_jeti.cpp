@@ -1249,5 +1249,3 @@ ISR(TIMER1_COMPB_vect)       // interrupt on COMPB is used to receive data (keyb
 // -------------------------End of Jeti protocol--------------------------------------------------------------------------------------
 
 #endif // END of JETI
-
-

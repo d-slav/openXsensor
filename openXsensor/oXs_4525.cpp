@@ -232,5 +232,3 @@ void OXS_4525::readSensor() {
 #endif
 
 } // End of readSensor
-
-

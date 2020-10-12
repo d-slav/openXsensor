@@ -81,5 +81,3 @@ extern bool test3ValueAvailable ;
 
 
 #endif // OXS_4525
-
-

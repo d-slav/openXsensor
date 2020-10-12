@@ -1131,4 +1131,3 @@ int dmp_register_android_orient_cb(void (*func)(unsigned char))               //
 /**
  *  @}
  */
-

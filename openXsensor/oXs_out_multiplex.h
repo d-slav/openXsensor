@@ -313,9 +313,3 @@ extern int16_t GPS_bearing ;
 
 #endif // End of MULTIPLEX
 #endif // OXS_OUT_MULTIPLEX_h
-
-
-
-
-
-

@@ -395,5 +395,3 @@ static bool next_fix = false ;
     }
     return false;
 }
-
-

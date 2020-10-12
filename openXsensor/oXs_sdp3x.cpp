@@ -161,5 +161,3 @@ void OXS_SDP3X::readSensor() {
         }  // end of process every xx millis
     } // end of process every 2 millis
 } // End of readSensor
-
-

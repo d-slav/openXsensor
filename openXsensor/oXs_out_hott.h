@@ -471,4 +471,3 @@ It seems that the delay of 3 msec can be reduced to less than 1 msec.
 The format of the message is given here above. 
 It is possible to send some info to reverse some fields on the display and to activate some alarms (but this version does not support it)
 */
-

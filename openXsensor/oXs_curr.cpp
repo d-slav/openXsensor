@@ -1,9 +1,11 @@
 #include "oXs_curr.h"
+#include "EEPROMAnything.h"
+#include "EEPROMConfig.h"
 
 #if defined( ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
 
 #ifdef DEBUG
-#define DEBUGCURRENT
+//#define DEBUGCURRENT
 #endif
 
 extern unsigned long micros( void ) ;
@@ -25,7 +27,8 @@ OXS_CURRENT::OXS_CURRENT(uint8_t pinCurrent)
 }
 
 // **************** Setup the Current sensor *********************
-void OXS_CURRENT::setupCurrent( ) {
+void OXS_CURRENT::setupCurrent( )
+ {
   uint16_t tempRef ; 
   //float currentDivider = 1.0 ;
 #ifdef USE_INTERNAL_REFERENCE   
@@ -57,8 +60,13 @@ void OXS_CURRENT::setupCurrent( ) {
     currentDivider = 1.0 * (RESISTOR_TO_GROUND_FOR_CURRENT + RESISTOR_TO_CURRENT_SENSOR ) / RESISTOR_TO_GROUND_FOR_CURRENT ;
   }
 #endif*/ 
-  offsetCurrentSteps =  1023.0 * MVOLT_AT_ZERO_AMP / tempRef;// / currentDivider;
-  mAmpPerStep =  /*currentDivider **/ tempRef / MVOLT_PER_AMP / 1.023 ; 
+  float value;
+  
+  EEPROM_readAnything(EE_CURRENT_MVOLT_AT_ZERO_AMP, value);
+  offsetCurrentSteps =  1023.0 * value/*MVOLT_AT_ZERO_AMP*/ / tempRef;// / currentDivider;
+  
+  EEPROM_readAnything(EE_CURRENT_MVOLT_PER_AMP, value);
+  mAmpPerStep =  /*currentDivider **/ tempRef / value/*MVOLT_PER_AMP*/ / 1.023 ; 
 
   currentData.milliAmps.available = false;
   currentData.consumedMilliAmps.available = false;
@@ -67,15 +75,15 @@ void OXS_CURRENT::setupCurrent( ) {
   resetValues();
 #ifdef DEBUG  
   printer->print("Current sensor on pin:");
-  printer->println(_pinCurrent);
-  printer->print("Reference voltage:");
-  printer->println(tempRef);
-  printer->print("Offset for current:");
-  printer->println(offsetCurrentSteps);
-  printer->print("mAmp per step:");
+  printer->print(_pinCurrent);
+  printer->print(", Reference voltage:");
+  printer->print(tempRef);
+  printer->print(", Offset for current:");
+  printer->print(offsetCurrentSteps);
+  printer->print(", mAmp per step:");
   printer->println(mAmpPerStep);
-  printer->print(" milli=");  
-  printer->println(millis());
+//  printer->print(" milli=");  
+//  printer->println(millis());
 #endif
   
 }
@@ -83,7 +91,8 @@ void OXS_CURRENT::setupCurrent( ) {
 
 // **************** Read the Current sensor *********************
 #if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
-void OXS_CURRENT::readSensor() {
+void OXS_CURRENT::readSensor() 
+{
   static int cnt = 0;
 //  static int cntMAmp =0;
   static unsigned long lastCurrentMillis = millis() ; 
@@ -106,7 +115,7 @@ void OXS_CURRENT::readSensor() {
   //currentData.sumCurrent += analogRead(_pinCurrent) ; 
   //sumCurrent += analogRead(_pinCurrent) ; 
   
-  filtered = filtered * 0.99 + analogRead(_pinCurrent) * 0.01;
+  filtered = filtered * 0.98 + analogRead(_pinCurrent) * 0.02;
   
   cnt++ ;
   //milliTmp = millis() ;
@@ -146,5 +155,3 @@ void OXS_CURRENT::resetValues(){
 
 
 #endif // end of #if defined( ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
-
-

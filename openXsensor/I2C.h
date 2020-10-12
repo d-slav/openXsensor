@@ -130,4 +130,3 @@ class I2C {
 extern I2C I2c;
 
 #endif
-

@@ -484,9 +484,3 @@ uint32_t millis( void ) ;
 #endif // Enf of ndef MULTIPLEX
 
 #endif // OXS_OUT_h
-
-
-
-
-
-

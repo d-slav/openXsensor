@@ -166,5 +166,3 @@ uint16_t OXS_EAGLETREE::powint10(uint16_t exponent)
 }
 
 #endif // end of #if defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES )
-
-

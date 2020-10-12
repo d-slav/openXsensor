@@ -1261,5 +1261,3 @@ See OpenXsensor https://github.com/openXsensor/
 * Just fill in test1.value (or 2, 3) with an int32_t and test1.available (or 2, 3) with true and add those OXS measurements in the data to be sent section. 
 ************************************************************************************************************************
 //#define DEBUG  // !! is to define in file oXs_config_macros.h
-
-

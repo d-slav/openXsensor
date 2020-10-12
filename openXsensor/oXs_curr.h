@@ -40,7 +40,3 @@ private:
 };
 
 #endif // OXS_CURRENT_h
-
-
-
-

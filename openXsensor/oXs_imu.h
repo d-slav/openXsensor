@@ -24,7 +24,3 @@ boolean run_mpu_self_test(boolean& gyro_ok, boolean& accel_ok) ;
 bool read6050 () ;   // return a flag that is true when a new acceleration is available
 void dump_all() ;
 #endif // OXS_IMU_h
-
-
-
-

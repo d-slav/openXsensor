@@ -34,6 +34,7 @@ private:
   byte _pinCurrent;
   float offsetCurrentSteps ;
   float mAmpPerStep ; 
+  float mAmpScale;
   float floatConsumedMilliAmps; // in mA
   int32_t sumCurrent ;
   float filtered;

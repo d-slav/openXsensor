@@ -773,14 +773,14 @@ if ( currentLoopMillis - lastLoop500Millis > 500 ) {
     if(millis() > 1500)
 		oXs_Out.sendData(); 
 
-	if(millis() > lastDebugMillis)
+	/* DUSAN if(millis() > lastDebugMillis)
 	{
 		lastDebugMillis += 500;
 		Serial.print("Voltage = ");
 		Serial.print( oXs_Voltage.voltageData.mVolt[0].value );
 		Serial.print(", Current = ");
 		Serial.println( oXs_Current.currentData.milliAmps.value );
-	}
+	}*/
    
 // PPM Processing = Read the ppm Signal from receiver  or use the SPORT ppm value from readSensors and process it 
 #if defined ( PPM_IS_USED ) 

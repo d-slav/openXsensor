@@ -5,12 +5,35 @@
 #if defined( ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
 
 #ifdef DEBUG
-//#define DEBUGCURRENT
+#define DEBUGCURRENT
 #endif
 
 extern unsigned long micros( void ) ;
 extern unsigned long millis( void ) ;
 extern void delay(unsigned long ms) ;
+
+float LinTab[][] = {
+	{0.2,0},
+	{1.4,0.1},
+	{20,1},
+	{107,5},
+	{856,40},
+};
+
+float GetCurrent(float ad_val)
+{
+	int i = 0;
+	while(i < 4)
+	{
+		if(ad_val > LinTab[i,0])
+			break;
+		i++;
+	}
+	
+	
+	
+	return 0;
+}
 
 #ifdef DEBUG  
 OXS_CURRENT::OXS_CURRENT(uint8_t pinCurrent, HardwareSerial &print)
@@ -63,10 +86,15 @@ void OXS_CURRENT::setupCurrent( )
   float value;
   
   EEPROM_readAnything(EE_CURRENT_MVOLT_AT_ZERO_AMP, value);
-  offsetCurrentSteps =  1023.0 * value/*MVOLT_AT_ZERO_AMP*/ / tempRef;// / currentDivider;
+  offsetCurrentSteps =  /*1023.0 * */value/* / tempRef*/ * 1000.0;
   
+  EEPROM_readAnything(EE_CURRENT_SCALE_CURRENT, value);
+  mAmpScale =  value; 
+
   EEPROM_readAnything(EE_CURRENT_MVOLT_PER_AMP, value);
-  mAmpPerStep =  /*currentDivider **/ tempRef / value/*MVOLT_PER_AMP*/ / 1.023 ; 
+  // mAmpPerStep =   (tempRef / 1.023) / (value * mAmpScale); // orig
+//     mAmpPerStep =   (value * mAmpScale) / (tempRef / 1.023); 
+  mAmpPerStep =   (value * mAmpScale);
 
   currentData.milliAmps.available = false;
   currentData.consumedMilliAmps.available = false;
@@ -120,29 +148,28 @@ void OXS_CURRENT::readSensor()
   cnt++ ;
   //milliTmp = millis() ;
   if(  ( milliTmp - lastCurrentMillis) > 200 ) 
-  {   // calculate average once per 200 millisec
-      //currentData.milliAmps.value = (((float)sumCurrent / cnt) - offsetCurrentSteps ) * mAmpPerStep ;
-	  //currentData.milliAmps.value = (filtered - offsetCurrentSteps) * mAmpPerStep;
-	  currentData.milliAmps.value = filtered * mAmpPerStep - offsetCurrentSteps;
-	  
-      //if (currentData.milliAmps.value < 0) currentData.milliAmps.value = 0 ;
-	  currentData.milliAmps.available = true ;
-//      if(currentData.minMilliAmps>currentData.milliAmps)currentData.minMilliAmps=currentData.milliAmps;
-//      if(currentData.maxMilliAmps<currentData.milliAmps)currentData.maxMilliAmps=currentData.milliAmps;
+  {   
+      // calculate average once per 200 millisec
+	    currentData.milliAmps.value = filtered * mAmpPerStep + offsetCurrentSteps;
+      
+      if (currentData.milliAmps.value < 0) currentData.milliAmps.value = 0 ;
+	    currentData.milliAmps.available = true ;
+      
       sumCurrent = 0;
       floatConsumedMilliAmps += ((float) currentData.milliAmps.value) * (milliTmp - lastCurrentMillis ) / 3600.0 /1000.0 ;   // Mike , is this ok when millis() overrun????
       currentData.consumedMilliAmps.value = (int32_t) floatConsumedMilliAmps;// / 10 ;
       currentData.consumedMilliAmps.available = true ;
       lastCurrentMillis =  milliTmp ;
 #ifdef DEBUGCURRENT
-      printer->print("At time  = ");
-      printer->print(milliTmp);
-      printer->print(" Cnt = ");
-      printer->print(cnt);
+      printer->print("filtered = ");
+      printer->print(filtered);
+//      printer->print(", Cnt = ");
+//      printer->print(cnt);
       printer->print(" average current =  ");
       printer->print(currentData.milliAmps.value);
-      printer->print(" consumed milliAmph =  ");
-      printer->println(currentData.consumedMilliAmps.value);
+//      printer->print(", Consumed milliAmph =  ");
+//      printer->print(currentData.consumedMilliAmps.value);
+      printer->println("");
 #endif
       cnt = 0;
   }  

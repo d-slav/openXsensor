@@ -74,7 +74,7 @@ void EEPROMConfig_char(int c)
 					EEPROM_writeAnything(reg, value);
 					if(reg == EE_VOLTAGE_RESISTOR_TO_GROUND	|| reg == EE_VOLTAGE_RESISTOR_TO_VOLTAGE || reg == EE_VOLTAGE_OFFSET_VOLTAGE || reg == EE_VOLTAGE_SCALE_VOLTAGE)
 						oXs_Voltage.setupVoltage(); 
-					else if(reg == EE_CURRENT_MVOLT_AT_ZERO_AMP || reg == EE_CURRENT_MVOLT_PER_AMP)
+					else if(reg == EE_CURRENT_MVOLT_AT_ZERO_AMP || reg == EE_CURRENT_MVOLT_PER_AMP || reg == EE_CURRENT_SCALE_CURRENT)
 						oXs_Current.setupCurrent();
 					break;
 					

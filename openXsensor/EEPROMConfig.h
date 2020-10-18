@@ -10,6 +10,7 @@
 
 #define EE_CURRENT_MVOLT_AT_ZERO_AMP	16
 #define EE_CURRENT_MVOLT_PER_AMP		20
+#define EE_CURRENT_SCALE_CURRENT		24
 
 
 //////////////////////////////////////////////////////////

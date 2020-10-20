@@ -26,6 +26,7 @@ public:
   void setupCurrent() ;
   void readSensor();
   void resetValues();
+  void setCurrentTab(uint8_t pos, float current);
 
 private:
 #ifdef DEBUG  

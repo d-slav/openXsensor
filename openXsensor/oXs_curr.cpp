@@ -1,3 +1,4 @@
+#include <float.h>
 #include "oXs_curr.h"
 #include "EEPROMAnything.h"
 #include "EEPROMConfig.h"
@@ -12,28 +13,42 @@ extern unsigned long micros( void ) ;
 extern unsigned long millis( void ) ;
 extern void delay(unsigned long ms) ;
 
-float LinTab[][] = {
-	{0.2,0},
-	{1.4,0.1},
-	{20,1},
-	{107,5},
-	{856,40},
+///////////////////////////////////////////////////////////////////////////////
+float LinTab[][3] = {
+	{ 1,	     0,    0 },
+	{ 2.5,	   78,   0 },
+	{ 20.8,    1000, 0 },
+	{ 108.15,	   5000, 0 },
+	{ FLT_MAX, 0   , 0 },
 };
 
+///////////////////////////////////////////////////////////////////////////////
 float GetCurrent(float ad_val)
 {
 	int i = 0;
-	while(i < 4)
+	while (true)
 	{
-		if(ad_val > LinTab[i,0])
+		if (ad_val < LinTab[++i][0] || LinTab[i][0] == FLT_MAX)
 			break;
-		i++;
 	}
-	
-	
-	
-	return 0;
+
+	while (LinTab[(--i) + 1][0] == FLT_MAX)
+		;
+
+	float Y = LinTab[i][1] + (ad_val - LinTab[i][0]) * LinTab[i][2];
+
+	if (Y < 0)
+		Y = 0;
+
+	return Y;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+void OXS_CURRENT::setCurrentTab(uint8_t pos, float current)
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 #ifdef DEBUG  
 OXS_CURRENT::OXS_CURRENT(uint8_t pinCurrent, HardwareSerial &print)
@@ -83,6 +98,18 @@ void OXS_CURRENT::setupCurrent( )
     currentDivider = 1.0 * (RESISTOR_TO_GROUND_FOR_CURRENT + RESISTOR_TO_CURRENT_SENSOR ) / RESISTOR_TO_GROUND_FOR_CURRENT ;
   }
 #endif*/ 
+	for(int i = 0; i <= 3; i++)
+	{
+		LinTab[i][2] = (LinTab[i+1][1] - LinTab[i][1]) / (LinTab[i+1][0] - LinTab[i][0]);
+		printer->print("AD = ");
+		printer->print(LinTab[i][0], 3);
+		printer->print(", I = ");
+		printer->print(LinTab[i][1], 3);
+		printer->print(", X = ");
+		printer->println(LinTab[i][2], 3);
+	}
+
+
   float value;
   
   EEPROM_readAnything(EE_CURRENT_MVOLT_AT_ZERO_AMP, value);
@@ -150,9 +177,10 @@ void OXS_CURRENT::readSensor()
   if(  ( milliTmp - lastCurrentMillis) > 200 ) 
   {   
       // calculate average once per 200 millisec
-	    currentData.milliAmps.value = filtered * mAmpPerStep + offsetCurrentSteps;
-      
-      if (currentData.milliAmps.value < 0) currentData.milliAmps.value = 0 ;
+	  //currentData.milliAmps.value = filtered * mAmpPerStep + offsetCurrentSteps;
+      //if (currentData.milliAmps.value < 0) currentData.milliAmps.value = 0 ;
+	  currentData.milliAmps.value = GetCurrent(filtered);
+	  
 	    currentData.milliAmps.available = true ;
       
       sumCurrent = 0;

@@ -11,12 +11,25 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 char cmd = 0;
 uint8_t reg;
-float value;
+float value = 0.0;
+int32_t i_value = 1;
 char buffer[15];
 int8_t buf_cnt;
 
 extern OXS_VOLTAGE oXs_Voltage;
 extern OXS_CURRENT oXs_Current;
+
+/*
+	v - zapis integer value
+	V - zapis float value
+	r - read integer value
+	R - read float value
+	w - zapis integer value
+	W - zapis float value
+	I - init ( 0 = napeti, 1 = proud )
+	C - zapise float value do registru a spusti mereni proudu pro nastavenou hodnotu proudu
+		V[skutecny proud]; C[pozicev tabulce proudu];
+*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void EEPROMConfig_char(int c)
@@ -29,7 +42,9 @@ void EEPROMConfig_char(int c)
 		case 'W':
 		case 'v':
 		case 'V':
-			cmd = toupper(c);
+		case 'I':
+		case 'C':
+			cmd = c;
 			buf_cnt = 0;
 			memset(buffer, 0, sizeof(buffer));
 			break;
@@ -74,14 +89,33 @@ void EEPROMConfig_char(int c)
 					EEPROM_writeAnything(reg, value);
 					if(reg == EE_VOLTAGE_RESISTOR_TO_GROUND	|| reg == EE_VOLTAGE_RESISTOR_TO_VOLTAGE || reg == EE_VOLTAGE_OFFSET_VOLTAGE || reg == EE_VOLTAGE_SCALE_VOLTAGE)
 						oXs_Voltage.setupVoltage(); 
-					else if(reg == EE_CURRENT_MVOLT_AT_ZERO_AMP || reg == EE_CURRENT_MVOLT_PER_AMP || reg == EE_CURRENT_SCALE_CURRENT)
-						oXs_Current.setupCurrent();
+					/*else if(reg == EE_CURRENT_MVOLT_AT_ZERO_AMP || reg == EE_CURRENT_MVOLT_PER_AMP || reg == EE_CURRENT_SCALE_CURRENT)
+						oXs_Current.setupCurrent();*/
 					break;
+					
+				case 'v':
+					i_value = atoi(buffer);
+					Serial.print(F("set value = "));
+					Serial.println(value);
 					
 				case 'V':
 					value = atof(buffer);
 					Serial.print(F("set value = "));
 					Serial.println(value);
+					break;
+					
+				case 'I':
+					reg = atoi(buffer);
+					switch(reg)
+					{
+					case 0: oXs_Voltage.setupVoltage(); break;
+					case 1: oXs_Current.setupCurrent(); break;
+					}
+					break;
+					
+				case 'C':
+					reg = atoi(buffer);
+					oXs_Current.setCurrentTab(reg, value);
 					break;
 			}
 		

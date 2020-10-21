@@ -115,7 +115,7 @@ void EEPROMConfig_char(int c)
 					
 				case 'C':
 					reg = atoi(buffer);
-					oXs_Current.setCurrentTab(reg, value);
+					oXs_Current.setCurrentTabStart(reg, value);
 					break;
 			}
 		

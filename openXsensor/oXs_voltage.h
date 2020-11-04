@@ -8,7 +8,8 @@
 
 #define NUM_VOLTAGES 1
 
-struct VOLTAGEDATA {
+struct VOLTAGEDATA 
+{
 //  bool available;    // to remove afterward
   uint16_t vrefMilliVolts;          // in mV the internal measured voltage Reference ; to remove afterward
 
@@ -19,7 +20,7 @@ struct VOLTAGEDATA {
   byte mVoltPin[NUM_VOLTAGES] ;            // Arduino pin number to use to read each voltage (See hardware setting in oXs_config.h)  
   int offset[NUM_VOLTAGES] ;               // offset to apply while converting ADC to millivolt (See setting in oXs_config.h)  
   float mVoltPerStep[NUM_VOLTAGES] ;       // rate to apply while converting ADC to millivolt (See setting in oXs_config.h)  
-
+  
   bool atLeastOneVolt ;         // true if there is at least one voltage to measure (added because otherwise a while in cpp never end)
   
   int32_t sumVoltage[NUM_VOLTAGES] ;       // used to calculate average voltage     
@@ -40,28 +41,29 @@ struct VOLTAGEDATA {
 };
 
 
-class OXS_VOLTAGE {
-  public:
+class OXS_VOLTAGE 
+{
+	public:
 #ifdef DEBUG  
     OXS_VOLTAGE(HardwareSerial &print);
 #else
     OXS_VOLTAGE( uint8_t x );
 #endif
-    VOLTAGEDATA voltageData ;
+	VOLTAGEDATA voltageData ;
 	void setupVoltage( void );
 	void readSensor();
 	void resetValues();
-  void convertNtcVoltToTemp (int32_t &voltage ) ;
-    
+	void convertNtcVoltToTemp (int32_t &voltage ) ;
+
   private:
 #ifdef DEBUG  
-     HardwareSerial* printer;
+	HardwareSerial* printer;
 #endif
-     int readVoltage( int value) ;  // read the voltage from the sensor specify by value
-     void voltageNrIncrease() ; 
-     uint32_t calculateCell(int32_t V0 , int32_t V1 , int32_t V2 , uint8_t cellId , uint8_t  maxNumberOfCells) ;  
+	int readVoltage( int value) ;  // read the voltage from the sensor specify by value
+	void voltageNrIncrease() ; 
+	uint32_t calculateCell(int32_t V0 , int32_t V1 , int32_t V2 , uint8_t cellId , uint8_t  maxNumberOfCells) ;  
 };
 
-extern bool lowVoltage ;
+//extern bool lowVoltage ;
 
 #endif

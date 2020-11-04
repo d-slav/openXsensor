@@ -1,0 +1,29 @@
+procedure SetVoltage();
+begin
+    // Napeti
+    ComSendstr('V5100;W0;v97600;W4;')
+    Delay(300)
+    ComSendstr('V1.02040816326531;W12;V0.0306122448979593;W8;')
+    Delay(300)
+end;
+
+procedure SetCurrent();
+begin
+    // Proud
+    ComSendstr('V2; W20; V0; W24;')
+    Delay(300)
+    ComSendstr('V4; W28; V300; W32;')
+    Delay(300)
+    ComSendstr('V17; W36; V1000;  W40;')
+    Delay(300)
+    ComSendstr('V422; W44; V20000; W48;')
+    Delay(300)
+    ComSendstr('R20;R24;R28;R32;R36;R40;R44;R48;')
+    ComSendstr('I1;')
+end;
+
+program test;
+begin
+    SetVoltage();
+    SetCurrent();
+end.

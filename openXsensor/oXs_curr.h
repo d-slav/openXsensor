@@ -25,9 +25,11 @@ public:
   CURRENTDATA currentData ;
   void setupCurrent() ;
   void readSensor();
-  void resetValues();
+  //void resetValues();
   void setCurrentTabStart(uint8_t pos, float current);
   void setCurrentTabFinish();
+  float AD_curr;
+  float IntTemperature;
 
 private:
 #ifdef DEBUG  

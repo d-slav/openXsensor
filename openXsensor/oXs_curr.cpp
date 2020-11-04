@@ -89,7 +89,7 @@ void OXS_CURRENT::setupCurrent( )
 }
 
 #define TEMP_CORRECTION 0.012						// cas korekce
-#define TEMP_CORR_FCOEF (4.5E-5 * TEMP_CORRECTION)	// velikost korekce
+#define TEMP_CORR_FCOEF (4.0E-5 * TEMP_CORRECTION)	// velikost korekce
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void OXS_CURRENT::readSensor() 

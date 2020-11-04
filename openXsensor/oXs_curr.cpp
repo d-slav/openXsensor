@@ -88,8 +88,8 @@ void OXS_CURRENT::setupCurrent( )
 	floatConsumedMilliAmps=0;
 }
 
-#define TEMP_CORRECTION 0.012						// cas korekce
-#define TEMP_CORR_FCOEF (4.0E-5 * TEMP_CORRECTION)	// velikost korekce
+#define TEMP_CORRECTION 0.009						// cas korekce (vetsi cislo = mensi cas)
+#define TEMP_CORR_FCOEF (3.8E-5 * TEMP_CORRECTION)	// velikost korekce
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void OXS_CURRENT::readSensor() 

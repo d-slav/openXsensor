@@ -10,13 +10,13 @@ end;
 procedure SetCurrent();
 begin
     // Proud
-    ComSendstr('V2; W20; V0; W24;')
+    ComSendstr('V14.0; W20; V0; W24;')
     Delay(300)
-    ComSendstr('V4; W28; V300; W32;')
+    ComSendstr('V20; W28; V500; W32;')
     Delay(300)
-    ComSendstr('V17; W36; V1000;  W40;')
+    ComSendstr('V26.9; W36; V1000;  W40;')
     Delay(300)
-    ComSendstr('V422; W44; V20000; W48;')
+    ComSendstr('V553; W44; V40000; W48;')
     Delay(300)
     ComSendstr('R20;R24;R28;R32;R36;R40;R44;R48;')
     Delay(300)
@@ -25,8 +25,8 @@ end;
 
 program test;
 begin
-    SetVoltage();
-    Delay(300)
-    //SetCurrent();
-    Delay(300)
+//    SetVoltage();
+//    Delay(300)
+    SetCurrent();
+//    Delay(300)
 end.

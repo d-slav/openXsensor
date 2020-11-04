@@ -776,12 +776,10 @@ if ( currentLoopMillis - lastLoop500Millis > 500 ) {
 	if(millis() > lastDebugMillis)
 	{
 		lastDebugMillis += 500;
-		Serial.print(", Voltage = ");
-		Serial.print( oXs_Voltage.voltageData.mVolt[0].value/1000.0 );
-		Serial.print(", AD Current = ");
-		Serial.print( oXs_Current.AD_curr );
-		Serial.print(", Current = ");
-		Serial.println( oXs_Current.currentData.milliAmps.value/1000.0 );
+		Serial.print("Voltage = ");				Serial.print( oXs_Voltage.voltageData.mVolt[0].value/1000.0 );
+		Serial.print(", AD Current = ");		Serial.print( oXs_Current.AD_curr );
+		Serial.print(", Current = "); 			Serial.print( oXs_Current.currentData.milliAmps.value/1000.0 );
+		Serial.print(", TempCorrection = ");	Serial.println( oXs_Current.TempCorrection );
 	}
    
 // PPM Processing = Read the ppm Signal from receiver  or use the SPORT ppm value from readSensors and process it 

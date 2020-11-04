@@ -11,13 +11,14 @@ end;
 procedure SetCurrent();
 begin
     // Proud
-    ComSendstr('V2; W20; V0; W24;')
+    //ComSendstr('V2; W20; V0; W24;')
+    ComSendstr('V1; W20; V0; W24;')
     Delay(300)
     ComSendstr('V5.2; W28; V300; W32;')
     Delay(300)
-    ComSendstr('V19.5; W36; V1000;  W40;')
+    ComSendstr('V20; W36; V1000;  W40;')
     Delay(300)
-    ComSendstr('V400; W44; V20000; W48;')
+    ComSendstr('V640; W44; V30200; W48;')
     Delay(300)
 //    ComSendstr('R20;R24;R28;R32;R36;R40;R44;R48;')
     ComSendstr('I1;')

@@ -7,47 +7,32 @@
 #include "oXs_config_macros.h"
 
 struct CURRENTDATA {
-  struct ONE_MEASUREMENT milliAmps;       // in mA
-  struct ONE_MEASUREMENT consumedMilliAmps;       // in mA
-  //int32_t consumedMilliAmps; // in mA
-  //bool consumedMilliAmpsAvailable;
+  struct ONE_MEASUREMENT milliAmps;       	// in mA
+  struct ONE_MEASUREMENT consumedMilliAmps; // in mA
 };
-
 
 
 class OXS_CURRENT {
 public:
 #ifdef DEBUG  
-  OXS_CURRENT(uint8_t pinCurrent, HardwareSerial &print);
+	OXS_CURRENT(uint8_t pinCurrent, HardwareSerial &print);
 #else
-  OXS_CURRENT(uint8_t pinCurrent) ;
+	OXS_CURRENT(uint8_t pinCurrent) ;
 #endif
-  CURRENTDATA currentData ;
-  void setupCurrent() ;
-  void readSensor();
-  //void resetValues();
-  void setCurrentTabStart(uint8_t pos, float current);
-  void setCurrentTabFinish();
-  float AD_curr;
-  float IntTemperature;
+	CURRENTDATA currentData ;
+	void setupCurrent() ;
+	void readSensor();
+
+	float AD_curr;
+	float TempCorrection;
 
 private:
 #ifdef DEBUG  
-  HardwareSerial* printer;
+	HardwareSerial* printer;
 #endif
-  byte _pinCurrent;
-//  float offsetCurrentSteps ;
-//  float mAmpPerStep ; 
-//  float mAmpScale;
-  float floatConsumedMilliAmps; // in mA
-  int32_t sumCurrent ;
-  float filtered;
-  uint32_t filtered_cnt;
-  
-  uint8_t ad_value_cnt;
-  float ad_value;
-  uint8_t set_current_for_pos;
-  float set_current_for_current;
+	byte _pinCurrent;
+	float floatConsumedMilliAmps; // in mA
+	float filtered;
 };
 
 #endif // OXS_CURRENT_h

@@ -34,32 +34,6 @@ float GetCurrent(float ad_val)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void OXS_CURRENT::setCurrentTabStart(uint8_t pos, float current)
-{
-	ad_value = 0;
-	ad_value_cnt = 100;
-	set_current_for_pos = pos;
-	set_current_for_current = current;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void OXS_CURRENT::setCurrentTabFinish()
-{
-	uint8_t pos = set_current_for_pos * (EE_CURRENT_AD_VALUE_1 - EE_CURRENT_AD_VALUE_0);
-	EEPROM_writeAnything(EE_CURRENT_AD_VALUE_0 + pos , ad_value / 100);
-	EEPROM_writeAnything(EE_CURRENT_CURRENT_0 + pos, set_current_for_current);
-  
-    printer->print("Write pos = ");
-    printer->print(set_current_for_pos);
-    printer->print(", AD = ");
-    printer->print(ad_value / 100, 3);
-    printer->print(", I = ");
-    printer->println(set_current_for_current, 3);
-      
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 #ifdef DEBUG  
 OXS_CURRENT::OXS_CURRENT(uint8_t pinCurrent, HardwareSerial &print)
 #else
@@ -102,17 +76,20 @@ void OXS_CURRENT::setupCurrent( )
 		printer->println(LinTab[i][2], 3);
 	}
 	
-	ad_value_cnt = 0;
+	//ad_value_cnt = 0;
 
 	currentData.milliAmps.available = false;
 	currentData.consumedMilliAmps.available = false;
 
 	filtered = 0.0;
-	filtered_cnt = 0;
+	TempCorrection - 0.0;
 
 	currentData.consumedMilliAmps.value=0;
 	floatConsumedMilliAmps=0;
 }
+
+#define TEMP_CORRECTION 0.012						// cas korekce
+#define TEMP_CORR_FCOEF (4.5E-5 * TEMP_CORRECTION)	// velikost korekce
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void OXS_CURRENT::readSensor() 
@@ -134,7 +111,8 @@ void OXS_CURRENT::readSensor()
   
 	if(  ( milliTmp - lastCurrentMillis) > 200) 
 	{
-		filtered = GetCurrent(AD_curr);
+		TempCorrection = TempCorrection * (1.0-TEMP_CORRECTION) + (AD_curr * AD_curr * TEMP_CORR_FCOEF);
+		filtered = GetCurrent(AD_curr - TempCorrection);
 		currentData.milliAmps.value = filtered;
 		currentData.milliAmps.available = true ;
 
@@ -143,26 +121,27 @@ void OXS_CURRENT::readSensor()
 		currentData.consumedMilliAmps.available = true ;
 		lastCurrentMillis =  milliTmp ;
 #ifdef DEBUGCURRENT
-      //printer->print("ad_value_cnt = ");
-      //printer->print(ad_value_cnt);
-      
-      //printer->print(" ,ad_value = ");
-      //printer->print(ad_value / (100 - ad_value_cnt));
-      //printer->print(", filtered = ");
-      //printer->print(filtered);
-      
-      //printer->print((uint16_t)(filtered * 100));
-      //printer->print(",");
-      //printer->print((uint16_t)(f2 * 100));
-      //printer->print(",");
-      //printer->print((uint16_t)(f1 * 1000));
-//      printer->print(", filtered_cnt = ");
-//      printer->print(filtered_cnt);
-//      printer->print(" average current =  ");
-//      printer->print(currentData.milliAmps.value);
-//      printer->print(", Consumed milliAmph =  ");
-//      printer->print(currentData.consumedMilliAmps.value);
-//      printer->println("");
+		//printer->print("T = "); printer->println(GetTemp());
+		//printer->print("ad_value_cnt = ");
+		//printer->print(ad_value_cnt);
+
+		//printer->print(" ,ad_value = ");
+		//printer->print(ad_value / (100 - ad_value_cnt));
+		//printer->print(", filtered = ");
+		//printer->print(filtered);
+
+		//printer->print((uint16_t)(filtered * 100));
+		//printer->print(",");
+		//printer->print((uint16_t)(f2 * 100));
+		//printer->print(",");
+		//printer->print((uint16_t)(f1 * 1000));
+		//printer->print(", filtered_cnt = ");
+		//printer->print(filtered_cnt);
+		//printer->print(" average current =  ");
+		//printer->print(currentData.milliAmps.value);
+		//printer->print(", Consumed milliAmph =  ");
+		//printer->print(currentData.consumedMilliAmps.value);
+		//printer->println("");
 #endif
 	}  
 }

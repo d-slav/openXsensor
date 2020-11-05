@@ -3,9 +3,10 @@ begin
     // Napeti
     ComSendstr('V5100;W0;v97600;W4;')
     Delay(300)
-    //ComSendstr('V1;W12;V0;W8;')
+//	ComSendstr('V1;W12;V0;W8;')
     ComSendstr('V1.0001;W12;V0.0300019999999961;W8;')
-    //Delay(300)
+    Delay(300)
+	ComSendstr('I0;')
 end;
 
 procedure SetCurrent();
@@ -19,12 +20,15 @@ begin
     Delay(300)
     ComSendstr('V800; W44; V39500; W48;')
     Delay(300)
-//    ComSendstr('R20;R24;R28;R32;R36;R40;R44;R48;')
+    ComSendstr('V0.012; W52; V4.0E-5; W56;')
+    Delay(300)
     ComSendstr('I1;')
 end;
 
 program test;
 begin
-    //SetVoltage();
+//    SetVoltage();
+//    Delay(300)
     SetCurrent();
+//    Delay(300)
 end.

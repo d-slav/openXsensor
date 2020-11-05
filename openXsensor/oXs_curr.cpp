@@ -74,7 +74,7 @@ void OXS_CURRENT::setupCurrent(/*HardwareSerial* printer*/)
 	currentData.consumedMilliAmps.available = false;
 
 	filtered = 0.0;
-	TempCorrection - 0.0;
+	TempCorrection = 0.0;
 
 	currentData.consumedMilliAmps.value=0;
 	floatConsumedMilliAmps=0;

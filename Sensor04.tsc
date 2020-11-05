@@ -3,8 +3,10 @@ begin
     // Napeti
     ComSendstr('V3900;W0;v97600;W4;')
     Delay(300)
-//    ComSendstr('V1;W12;V0;W8;')
+//	ComSendstr('V1;W12;V0;W8;')
     ComSendstr('V0.981728880157171;W12;V0.0346345776031427;W8;')
+    Delay(300)
+	ComSendstr('I0;')
 end;
 
 procedure SetCurrent();

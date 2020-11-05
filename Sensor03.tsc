@@ -1,26 +1,27 @@
 procedure SetVoltage();
 begin
     // Napeti
-    ComSendstr('V5100;W0;v97600;W4;')
+    ComSendstr('V5100;W0;V97600;W4;')
     Delay(300)
-    //ComSendstr('V1;W12;V0;W8;')
+//	ComSendstr('V1;W12;V0;W8;')
     ComSendstr('V1.01389452332657;W12;V0.00186105476673681;W8;')
-    //Delay(300)
+    Delay(300)
+	ComSendstr('I0;')
 end;
 
 procedure SetCurrent();
 begin
     // Proud
-    //ComSendstr('V2; W20; V0; W24;')
     ComSendstr('V1; W20; V0; W24;')
     Delay(300)
     ComSendstr('V5.2; W28; V300; W32;')
     Delay(300)
     ComSendstr('V20; W36; V1000;  W40;')
     Delay(300)
-    ComSendstr('V640; W44; V30200; W48;')
+    ComSendstr('V600; W44; V30200; W48;')
     Delay(300)
-//    ComSendstr('R20;R24;R28;R32;R36;R40;R44;R48;')
+    ComSendstr('V0.012; W52; V4.5E-5; W56;')
+    Delay(300)
     ComSendstr('I1;')
 end;
 

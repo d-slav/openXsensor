@@ -2,42 +2,30 @@
 
 #if defined(SENSOR_IS_BMP280) 
 
-#ifdef DEBUG
-//#define DEBUGI2CBMP280
-//#define DEBUGDATA
-//#define DEBUGVARIOI2C
-#endif
-
 extern unsigned long micros( void ) ;
 extern unsigned long millis( void ) ;
 extern void delay(unsigned long ms) ;
 
 static BMP280_CALIB_DATA _bmp280_coeffs;   // Last read calibration data will be available here
-//static uint8_t           _bmp085Mode;
 
-
-#ifdef DEBUG  
-OXS_BMP280::OXS_BMP280( HardwareSerial &print)
-#else
+///////////////////////////////////////////////////////////////////////////////////////////////////
 OXS_BMP280::OXS_BMP280(void)
-#endif
 {
-  // constructor
-  //_addr=addr;
 #define I2C_BMP280_ADR 0x76 ; 
-  _addr = I2C_BMP280_ADR ;
-  varioData.SensorState = 0 ;
-#ifdef DEBUG  
+	_addr = I2C_BMP280_ADR ;
+	varioData.SensorState = 0 ;
+/*#ifdef DEBUG  
   printer = &print; //operate on the address of print
-  printer->begin(115200);
-  printer->print("Vario Sensor:BMP280 I2C Addr=");
-  printer->println(_addr,HEX);
-#endif
+  Serial.begin(115200);
+  Serial.print("Vario Sensor:BMP280 I2C Addr=");
+  Serial.println(_addr,HEX);
+#endif*/
 }
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
 // **************** Setup the BMP280 sensor *********************
-void OXS_BMP280::setup() {
+void OXS_BMP280::setup() 
+{
   unsigned int _calibrationData[13]; // The factory calibration data of the BMP280
   varioData.absoluteAlt.available = false ;
   varioData.relativeAlt.available = false ; 
@@ -56,10 +44,10 @@ void OXS_BMP280::setup() {
 
   
 #ifdef DEBUG
-  printer->println(F("Vario Sensor:BMP280"));
-//  printer->println(" ");
-//  printer->print(F(" milli="));  
-//  printer->println(millis());
+  Serial.println(F("Vario Sensor:BMP280"));
+//  Serial.println(" ");
+//  Serial.print(F(" milli="));  
+//  Serial.println(millis());
 
 #endif
   
@@ -67,8 +55,8 @@ void OXS_BMP280::setup() {
   I2c.timeOut( 80); //initialise the time out in order to avoid infinite loop
 #ifdef DEBUGI2CBMP280
   I2c.scan() ;
-  printer->print(F("last I2C scan adr: "));
-  printer->println( I2c.scanAdr , HEX  );
+  Serial.print(F("last I2C scan adr: "));
+  Serial.println( I2c.scanAdr , HEX  );
 #endif  
 
 // write in register 0xF4 value 0x33 (it means oversampling temperature 1 X , oversampling pressure 8 X and normal mode = continue )
@@ -77,27 +65,31 @@ void OXS_BMP280::setup() {
     errorI2C = I2c.write( _addr , (uint8_t) 0xF5 , (uint8_t) 0x00 ) ;
 
     errorCalibration = false ;
-    for (byte i = 1; i <=12; i++) {
+    for (byte i = 1; i <=12; i++) 
+	{
        errorI2C =  I2c.read( _addr , 0x86 + i*2, 2 ) ; //read 2 bytes from the device after sending the register to be read (first register = 0x86 (=register AC1)
-       if ( errorI2C > 0 ) {
+       if ( errorI2C > 0 ) 
+	   {
 #ifdef DEBUG
-            printer->print(F("error code in setup I2CRead: "));
-            printer->println( errorI2C );
+            Serial.print(F("error code in setup I2CRead: "));
+            Serial.println( errorI2C );
 #endif
             errorCalibration = true ;
-        } else {
+        } 
+		else 
+		{
             low = I2c.receive() ;
             high = I2c.receive() ;
             _calibrationData[i] = high<<8 | low;
         }  
-#ifdef DEBUG
-        printer->print(F("calibration data #"));
-        printer->print(i);
-        printer->print(F(" = "));
-        printer->print( _calibrationData[i] );
-        printer->print(F(" error= "));
-        printer->println( errorI2C );
-#endif
+/*#ifdef DEBUG
+        Serial.print(F("calibration data #"));
+        Serial.print(i);
+        Serial.print(F(" = "));
+        Serial.print( _calibrationData[i] );
+        Serial.print(F(" error= "));
+        Serial.println( errorI2C );
+#endif*/
     } // End for 
 
     _bmp280_coeffs.dig_T1 = _calibrationData[1];
@@ -118,7 +110,7 @@ void OXS_BMP280::setup() {
     
 
 #ifdef DEBUG  
-  printer->println(F("setup vario done."));  
+  Serial.println(F("setup vario done."));  
 #endif
   
 }  //end of setup
@@ -286,28 +278,28 @@ void OXS_BMP280::calculateVario() {
       if (firstPrintAlt == true) 
 	  {
           firstPrintAlt = false ;
-//          printer->println(F( "T,Ra,Sm,A,NC,DS,AHP,ALP,CR2, Temp" )) ;
-          printer->println(F( "T,Ra,Alt,vpsd, Alt2, rawVspd, vspd2 , smoothAlt, smoothVspd" )) ;
+//          Serial.println(F( "T,Ra,Sm,A,NC,DS,AHP,ALP,CR2, Temp" )) ;
+          Serial.println(F( "T,Ra,Alt,vpsd, Alt2, rawVspd, vspd2 , smoothAlt, smoothVspd" )) ;
       } */   
-			printer->print( varioData.relativeAlt.value ) ;            printer->print(" ,"); 
-			//printer->print( varioData.absoluteAlt.value ) ;            printer->print(" ,"); 
-            printer->print( varioData.climbRate.value ) ;              printer->print(" ,"); 
+			Serial.print( varioData.relativeAlt.value ) ;            Serial.print(" ,"); 
+			//Serial.print( varioData.absoluteAlt.value ) ;            Serial.print(" ,"); 
+            Serial.print( varioData.climbRate.value ) ;              Serial.print(" ,"); 
 			
-            //printer->print(  pressureMicrosPrev1 ) ; printer->print(",");
-            //printer->print(  (float) varioData.rawAltitude  ) ; printer->print(","); // alt is displayed in CM with 2 decimal
-            //printer->print(  expoSmooth ) ;             printer->print(" ,");
-            //printer->print( (float) altitude  ) ;             printer->print(" ,");
- //           printer->print( delaySmooth ) ;            printer->print(" ,"); 
- //           printer->print( altitudeHighPass ) ;             printer->print(" ,"); 
- //           printer->print( altitudeLowPass ) ;            printer->print(" ,"); 
-            //printer->print( climbRate2AltFloat ) ;             printer->print(" ,"); 
-            //printer->print( varioData.temperature ) ;
- //           printer->print( smoothAltitude ) ;            printer->print(" ,"); 
- //           printer->print( rawRateVSpeed ) ;            printer->print(" ,"); 
-            //printer->print( smoothRateVSpeed ) ;            printer->print(" ,"); 
- //           printer->print( expoSmooth5611_alt_auto * 1000 ) ;            printer->print(" ,"); 
- //           printer->print( expoSmooth5611_vSpeed_auto * 1000 ) ;            printer->print(" ,"); 
-            printer->println( ) ;
+            //Serial.print(  pressureMicrosPrev1 ) ; Serial.print(",");
+            //Serial.print(  (float) varioData.rawAltitude  ) ; Serial.print(","); // alt is displayed in CM with 2 decimal
+            //Serial.print(  expoSmooth ) ;             Serial.print(" ,");
+            //Serial.print( (float) altitude  ) ;             Serial.print(" ,");
+ //           Serial.print( delaySmooth ) ;            Serial.print(" ,"); 
+ //           Serial.print( altitudeHighPass ) ;             Serial.print(" ,"); 
+ //           Serial.print( altitudeLowPass ) ;            Serial.print(" ,"); 
+            //Serial.print( climbRate2AltFloat ) ;             Serial.print(" ,"); 
+            //Serial.print( varioData.temperature ) ;
+ //           Serial.print( smoothAltitude ) ;            Serial.print(" ,"); 
+ //           Serial.print( rawRateVSpeed ) ;            Serial.print(" ,"); 
+            //Serial.print( smoothRateVSpeed ) ;            Serial.print(" ,"); 
+ //           Serial.print( expoSmooth5611_alt_auto * 1000 ) ;            Serial.print(" ,"); 
+ //           Serial.print( expoSmooth5611_vSpeed_auto * 1000 ) ;            Serial.print(" ,"); 
+            Serial.println( ) ;
             
 #endif        
 

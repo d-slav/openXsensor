@@ -8,6 +8,7 @@
 
 #define NUM_VOLTAGES 1
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 struct VOLTAGEDATA 
 {
 //  bool available;    // to remove afterward
@@ -40,30 +41,23 @@ struct VOLTAGEDATA
 #endif
 };
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
 class OXS_VOLTAGE 
 {
-	public:
-#ifdef DEBUG  
-    OXS_VOLTAGE(HardwareSerial &print);
-#else
+public:
     OXS_VOLTAGE( uint8_t x );
-#endif
 	VOLTAGEDATA voltageData ;
 	void setupVoltage( void );
 	void readSensor();
 	void resetValues();
 	void convertNtcVoltToTemp (int32_t &voltage ) ;
 
-  private:
-#ifdef DEBUG  
-	HardwareSerial* printer;
-#endif
+private:
 	int readVoltage( int value) ;  // read the voltage from the sensor specify by value
 	void voltageNrIncrease() ; 
 	uint32_t calculateCell(int32_t V0 , int32_t V1 , int32_t V2 , uint8_t cellId , uint8_t  maxNumberOfCells) ;  
 };
 
-//extern bool lowVoltage ;
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif

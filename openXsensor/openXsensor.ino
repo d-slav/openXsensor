@@ -388,11 +388,11 @@ uint8_t selectedVario = VARIO_PRIMARY ; // identify the vario to be used when sw
         OXS_BMP180 oXs_MS5611 = OXS_BMP180();
       #endif  //DEBUG
   #elif defined(SENSOR_IS_BMP280 )
-      #ifdef DEBUG  
+ /*     #ifdef DEBUG  
         OXS_BMP280 oXs_MS5611 = OXS_BMP280(Serial);
-      #else
+      #else*/
         OXS_BMP280 oXs_MS5611 = OXS_BMP280();
-      #endif  //DEBUG
+      //#endif  //DEBUG
   #else // not a BMP180 or BMP280
       #ifdef DEBUG  
         OXS_MS5611 oXs_MS5611(I2C_MS5611_Add,Serial);
@@ -428,19 +428,11 @@ uint8_t selectedVario = VARIO_PRIMARY ; // identify the vario to be used when sw
 #endif
 
 #if defined(ARDUINO_MEASURES_VOLTAGES) && (ARDUINO_MEASURES_VOLTAGES == YES)
-  #ifdef DEBUG  
-    OXS_VOLTAGE oXs_Voltage(Serial);
-  #else
     OXS_VOLTAGE oXs_Voltage(0);
-  #endif  //DEBUG
 #endif
 
 #if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
-  #ifdef DEBUG  
-    OXS_CURRENT oXs_Current(PIN_CURRENTSENSOR,Serial);
-  #else
     OXS_CURRENT oXs_Current(PIN_CURRENTSENSOR);
-  #endif //DEBUG
 #endif
 
 #if defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
@@ -538,10 +530,10 @@ void setup()
 #endif
 
 #ifdef VARIO
-#ifdef DEBUG 
+/*#ifdef DEBUG 
   Serial.println(F("vario setting up.."));
   delay(1000);
-#endif 
+#endif */
   oXs_MS5611.setup();
 #ifdef DEBUG 
   Serial.println(F("vario is up.."));
@@ -549,10 +541,6 @@ void setup()
 #endif 
 
   oXs_Out.varioData=&oXs_MS5611.varioData; 
-  #ifdef PIN_ANALOG_VSPEED
-    lastMillisPWR = 3500 ; // So we will wait for 3.5 sec before generating a Vertical speed on PWM
-    analogWrite(PIN_ANALOG_VSPEED,255/5*1.6); // initialize the output pin 
-  #endif
 #endif // vario
 
 #ifdef VARIO2
@@ -776,10 +764,11 @@ if ( currentLoopMillis - lastLoop500Millis > 500 ) {
 	if(millis() > lastDebugMillis)
 	{
 		lastDebugMillis += 500;
-		Serial.print("Voltage = ");				Serial.print( oXs_Voltage.voltageData.mVolt[0].value/1000.0 );
-		Serial.print(", AD Current = ");		Serial.print( oXs_Current.AD_curr );
-		Serial.print(", Current = "); 			Serial.print( oXs_Current.currentData.milliAmps.value/1000.0 );
-		Serial.print(", TempCorrection = ");	Serial.println( oXs_Current.TempCorrection );
+		Serial.print("Voltage = ");		Serial.print( oXs_Voltage.voltageData.mVolt[0].value/1000.0 );
+		Serial.print(", AdCurrent = ");	Serial.print( oXs_Current.AD_curr );
+		Serial.print(", Current = "); 	Serial.print( oXs_Current.currentData.milliAmps.value/1000.0 );
+		Serial.print(", TempCorr = ");	Serial.print( oXs_Current.TempCorrection );
+		Serial.print(", Fuel = ");		Serial.println( oXs_Current.currentData.consumedMilliAmps.value );
 	}
    
 // PPM Processing = Read the ppm Signal from receiver  or use the SPORT ppm value from readSensors and process it 
@@ -790,18 +779,6 @@ if ( currentLoopMillis - lastLoop500Millis > 500 ) {
     ProcessPPMSignal();
 #endif      
 #endif //PIN_PPM
-
-// if analog vario, generate the PWR value
-#if defined (VARIO) && defined(PIN_ANALOG_VSPEED)
-    if (millis() > lastMillisPWR + 100) {
-        if (checkFreeTime()) { // Do not change PWM if there is less than 2000 usec before MS5611 ADC is available =  (9000 - 2000)/2
-            PWRValue=map( (long) oXs_MS5611.varioData.climbRate.value ,ANALOG_VSPEED_MIN*100,ANALOG_VSPEED_MAX * 100,0,255/5*3.2);
-            PWRValue=constrain(PWRValue, 0, 255/5*3.2 ) ;
-            analogWrite(PIN_ANALOG_VSPEED,(int)PWRValue);
-            lastMillisPWR = millis() ; 
-        }
-    }  
-#endif // analog vario 
 
 // if a sequence is set up
 #ifdef SEQUENCE_OUTPUTS

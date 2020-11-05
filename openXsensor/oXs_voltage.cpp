@@ -1,33 +1,19 @@
 #include "oXs_voltage.h"
 #include "EEPROMAnything.h"
 #include "EEPROMConfig.h"
+
+#define tempRef 1100
+#define voltageNr 0
+#define cntVolt 0
  
-#ifdef DEBUG
-//#define DEBUGNEWVALUE
-//#define DEBUGDELAY
-//#define DEBUGCELLCALCULATION
-//#define DEBUGLOWVOLTAGE
-//#define DEBUGNTC
-#endif
-
-
 extern unsigned long micros( void ) ;
 extern unsigned long millis( void ) ;
 extern void delay(unsigned long ms) ;
 
-
-#ifdef DEBUG
-OXS_VOLTAGE::OXS_VOLTAGE(HardwareSerial &print) 
-#else
+///////////////////////////////////////////////////////////////////////////////////////////////////
 OXS_VOLTAGE::OXS_VOLTAGE(uint8_t x) 
-#endif
 {
-#ifdef DEBUG  
-  printer = &print; //operate on the address of print   
-#endif
 }
-
-#define tempRef 1100
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void OXS_VOLTAGE::setupVoltage( void ) 
@@ -54,33 +40,23 @@ void OXS_VOLTAGE::setupVoltage( void )
     voltageData.mVoltPerStep[0] = tempRef / 1023.0 * ( tempResistorToGround + tempResistorToVoltage ) / tempResistorToGround  * tempScaleVoltage;
     voltageData.sumVoltage[0] = 0 ;
     voltageData.mVolt[0].available = false ; 
-#ifdef DEBUG  
-    printer->println("Voltage:");
-	printer->print("ResistorToGround = "); 	printer->println(tempResistorToGround);
-    printer->print("ResistorToVoltage = "); printer->println(tempResistorToVoltage);
-    printer->print("VoltPerStep = "); 		printer->println( voltageData.mVoltPerStep[0] );
-    printer->print("Offset = "); 			printer->println( voltageData.offset[0] );
-#endif
+
+    Serial.println("Voltage:");
+	Serial.print("ResistorToGround = "); 	Serial.println(tempResistorToGround);
+    Serial.print("ResistorToVoltage = ");	Serial.println(tempResistorToVoltage);
+    Serial.print("VoltPerStep = "); 		Serial.println( voltageData.mVoltPerStep[0] );
+    Serial.print("Offset = "); 				Serial.println( voltageData.offset[0] );
 }
-#define voltageNr 0
-#define cntVolt 0
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void OXS_VOLTAGE::readSensor() {
 
     if (voltageData.atLeastOneVolt) 
 	{ 
-#ifdef DEBUGDELAY
-        long milliVoltBegin = micros() ;
-#endif
-        voltageData.sumVoltage[voltageNr] += readVoltage(voltageNr) ;   // read voltage 
 /*#ifdef DEBUGDELAY
-        milliVoltBegin = milliVoltBegin - micros() ;
-        printer->print("VoltageNr ");
-        printer->print(voltageNr);
-        printer->print(" in ");
-        printer->println(milliVoltBegin);
+        long milliVoltBegin = micros() ;
 #endif*/
+        voltageData.sumVoltage[voltageNr] += readVoltage(voltageNr) ;   // read voltage 
 
         voltageNrIncrease();                          // Find next voltage to be read; if overlap, calculate average for each voltage
     }
@@ -92,7 +68,6 @@ void OXS_VOLTAGE::voltageNrIncrease()
 	static int cnt = 0;
 	static unsigned long lastVoltMillis = millis() ;
 
-	//voltageNr = 0 ;
 	cnt++;
 	if(millis() > ( lastVoltMillis + 500) )
 	{
@@ -100,7 +75,7 @@ void OXS_VOLTAGE::voltageNrIncrease()
 		voltageData.mVolt[cntVolt].available = true ;
 		voltageData.sumVoltage[cntVolt] = 0 ;
 		
-#ifdef DEBUGNEWVALUE
+/*#ifdef DEBUGNEWVALUE
 		printer->print("At ");
 		printer->print(millis());
 		printer->print(" Cnt = ");
@@ -109,7 +84,7 @@ void OXS_VOLTAGE::voltageNrIncrease()
 		printer->print(cntVolt);
 		printer->print(" = ");
 		printer->println( voltageData.mVolt[cntVolt].value );
-#endif
+#endif*/
 
         cnt=0;
         lastVoltMillis = millis() ;

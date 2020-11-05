@@ -3,10 +3,6 @@
 #include "EEPROMAnything.h"
 #include "EEPROMConfig.h"
 
-#ifdef DEBUG
-#define DEBUGCURRENT
-#endif
-
 extern unsigned long micros( void ) ;
 extern unsigned long millis( void ) ;
 extern void delay(unsigned long ms) ;
@@ -34,22 +30,14 @@ float GetCurrent(float ad_val)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-#ifdef DEBUG  
-OXS_CURRENT::OXS_CURRENT(uint8_t pinCurrent, HardwareSerial &print)
-#else
 OXS_CURRENT::OXS_CURRENT(uint8_t pinCurrent)
-#endif
 {
-  // constructor
-#ifdef DEBUG  
-  printer = &print; //operate on the address of print
-#endif
   _pinCurrent=pinCurrent;
   pinMode(pinCurrent,INPUT); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void OXS_CURRENT::setupCurrent( )
+void OXS_CURRENT::setupCurrent(/*HardwareSerial* printer*/)
 {
 	float value;
 	
@@ -65,21 +53,21 @@ void OXS_CURRENT::setupCurrent( )
 			  LinTab[i-1][2] = (LinTab[i][1] - LinTab[i-1][1]) / (LinTab[i][0] - LinTab[i-1][0]);
 	}
 
-	EEPROM_readAnything(EE_TEMP_CORRECTION, value); // cas korekce (vetsi cislo = mensi cas)
-	TempCorrTime = 1.0 - value;
+	EEPROM_readAnything(EE_TEMP_CORRECTION, TempCorrTime); // cas korekce (vetsi cislo = mensi cas)
 	EEPROM_readAnything(EE_TEMP_CORR_COEF, value); 	// velikost korekce
 	TempCorrKoef = value * TempCorrTime;		
+	TempCorrTime = 1.0 - TempCorrTime;
 
 	for(int i = 0; i < TAB_ROWS; i++)
 	{
-		printer->print("Pos = ");
-		printer->print(i);
-		printer->print(", AD = ");
-		printer->print(LinTab[i][0], 3);
-		printer->print(", I = ");
-		printer->print(LinTab[i][1], 3);
-		printer->print(", X = ");
-		printer->println(LinTab[i][2], 3);
+		Serial.print("Pos = ");
+		Serial.print(i);
+		Serial.print(", AD = ");
+		Serial.print(LinTab[i][0], 3);
+		Serial.print(", I = ");
+		Serial.print(LinTab[i][1], 3);
+		Serial.print(", X = ");
+		Serial.println(LinTab[i][2], 3);
 	}
 	
 	currentData.milliAmps.available = false;
@@ -91,9 +79,6 @@ void OXS_CURRENT::setupCurrent( )
 	currentData.consumedMilliAmps.value=0;
 	floatConsumedMilliAmps=0;
 }
-
-//#define TEMP_CORRECTION 0.009						// cas korekce (vetsi cislo = mensi cas)
-//#define TEMP_CORR_FCOEF (3.8E-5 * TEMP_CORRECTION)	// velikost korekce
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void OXS_CURRENT::readSensor() 
@@ -124,7 +109,7 @@ void OXS_CURRENT::readSensor()
 		currentData.consumedMilliAmps.value = (int32_t) floatConsumedMilliAmps;// / 10 ;
 		currentData.consumedMilliAmps.available = true ;
 		lastCurrentMillis =  milliTmp ;
-#ifdef DEBUGCURRENT
+/*#ifdef DEBUGCURRENT
 		//printer->print("T = "); printer->println(GetTemp());
 		//printer->print("ad_value_cnt = ");
 		//printer->print(ad_value_cnt);
@@ -146,7 +131,7 @@ void OXS_CURRENT::readSensor()
 		//printer->print(", Consumed milliAmph =  ");
 		//printer->print(currentData.consumedMilliAmps.value);
 		//printer->println("");
-#endif
+#endif*/
 	}  
 }
 

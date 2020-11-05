@@ -51,30 +51,31 @@ extern void delay(unsigned long ms) ;
 
 //used only by Sport protocol
 //extern uint8_t  volatile  sportData[7] ;
-//uint8_t  volatile TxData[8] ;
-//uint8_t  volatile TxDataIdx ;
-//uint8_t rxStuff ;
+uint8_t  volatile TxData[8] ;
+uint8_t  volatile TxDataIdx ;
+uint8_t rxStuff ;
 //extern uint8_t LastRx ;
 //static volatile uint8_t prevLastRx ;           // just for testing
 
 //uint8_t volatile sportDataLock ;
 //extern uint8_t volatile sendStatus ;
 #if defined(VFAS_SOURCE) 
-  struct ONE_MEASUREMENT vfas ; 
+	struct ONE_MEASUREMENT vfas ; 
 #endif
 
 #if ( defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES) ) || ( defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)) 
-    struct ONE_MEASUREMENT sport_currentData ;
+    struct ONE_MEASUREMENT sport_currentData;
+    struct ONE_MEASUREMENT sport_consumedMilliAmps;
 #endif
 
-#if defined(GPS_INSTALLED)
+/*#if defined(GPS_INSTALLED)
     struct ONE_MEASUREMENT sport_gps_lon ; 
     struct ONE_MEASUREMENT sport_gps_lat ;
     struct ONE_MEASUREMENT sport_gps_alt ;
     struct ONE_MEASUREMENT sport_gps_speed ; 
     struct ONE_MEASUREMENT sport_gps_course;
     extern bool GPS_fix ;
-#endif
+#endif*/
 
 extern struct ONE_MEASUREMENT sport_rpm ;
 
@@ -107,24 +108,25 @@ OXS_OUT::OXS_OUT(uint8_t pinTx,HardwareSerial &print)
 OXS_OUT::OXS_OUT(uint8_t pinTx)
 #endif
 {
-  _pinTx = pinTx ;    
+	_pinTx = pinTx ;    
 #ifdef DEBUG 
-  printer = &print; //operate on the address of print
+	printer = &print; //operate on the address of print
 #endif
 } // end constructor
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
 // **************** Setup the FRSky OutputLib *********************
-void OXS_OUT::setup() {
-// here we look if sport is available or not; when available, sport protocol must be activated otherwise hub protocol
+void OXS_OUT::setup() 
+{
+	// here we look if sport is available or not; when available, sport protocol must be activated otherwise hub protocol
     //initilalise PORT
     TRXDDR &= ~( 1 << PIN_SERIALTX ) ;       // PIN is input, tri-stated.
     TRXPORT &= ~( 1 << PIN_SERIALTX ) ;      // PIN is input, tri-stated.
-#if PIN_SERIALTX == 7
-		ADCSRB &= ~(1<<ACME) ;
-		ACSR = (1<<ACBG) | (1 << ACIS1) ;
-		DIDR1 |= (1<<AIN1D) ;
-#endif
+/*#if PIN_SERIALTX == 7
+	ADCSRB &= ~(1<<ACME) ;
+	ACSR = (1<<ACBG) | (1 << ACIS1) ;
+	DIDR1 |= (1<<AIN1D) ;
+#endif*/
 
 #if defined( PROTOCOL ) && ( PROTOCOL == FRSKY_SPORT )
     initMeasurement() ;
@@ -139,39 +141,46 @@ void OXS_OUT::setup() {
     PCMSK2 |= 0x10 ;			            // IO4 (PD4) on Arduini mini
 #elif PIN_SERIALTX == 2
     PCMSK2 |= 0x04 ;                  // IO2 (PD2) on Arduini mini
-#else
- #if PIN_SERIALTX != 7
-    #error "This PIN is not supported"
- #endif
+/*#else
+	#if PIN_SERIALTX != 7
+		#error "This PIN is not supported"
+	#endif*/
 #endif // test on PIN_SERIALTX
+
     delay(1500) ; // this delay has been added because some users reported that SPORT is not recognised with a X6R ; perhaps is it related to the EU firmware (2015)
 #ifdef DEBUG_SPORT_PIN 
     digitalWrite(DEBUG_SPORT_PIN, HIGH); // Set the pulse used during SPORT detection to HIGH because detecttion is starting
 #endif
 
-#if PIN_SERIALTX == 7
+/*#if PIN_SERIALTX == 7
     ACSR |= ( 1<<ACI ) ;              // clear pending interrupt
-#else
+#else*/
     PCIFR = (1<<PCIF2) ;	            // clear pending interrupt
-#endif
+//#endif
+
     delay(20) ;                      // to see if SPORT is active, we have to wait at least 12 msec and check bit PCIF2 from PCIFR; if bit is set, it is SPORT
 #ifdef DEBUG_SPORT_PIN
     digitalWrite(DEBUG_SPORT_PIN, LOW); // Set the pulse used during SPORT detection to LOW because detection is done
 #endif
-#if PIN_SERIALTX == 7
-    if ( ( ACSR & (1<<ACI)) == 0 ) {
-#else
-    if ( ( PCIFR & (1<<PCIF2)) == 0 ) {
-#endif
+
+/*#if PIN_SERIALTX == 7
+    if ( ( ACSR & (1<<ACI)) == 0 ) 
+	{
+#else*/
+    if ( ( PCIFR & (1<<PCIF2)) == 0 ) 
+	{
+//#endif
         sportAvailable = false ;
         initHubUart() ;
     }
-    else {
+    else 
+	{
         sportAvailable = true ;
         initMeasurement() ;
         initSportUart() ;
     }
 #endif // end test on FRSKY
+
 #ifdef DEBUG
       printer->print(F("FRSky Output Module: TX Pin="));
       printer->println(_pinTx);
@@ -180,18 +189,18 @@ void OXS_OUT::setup() {
 #endif // end DEBUG
 }  // end of setup
 
-
-void OXS_OUT::sendData() {
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void OXS_OUT::sendData() 
+{
 #if defined( PROTOCOL ) && ( PROTOCOL == FRSKY_SPORT )
-  sendSportData() ;
+	sendSportData();
 #elif defined(PROTOCOL) && ( PROTOCOL == FRSKY_HUB )
-  sendHubData() ;
+	sendHubData();
 #else                           // we will detect automatically if SPORT is available     
-  if (sportAvailable) {
-	  sendSportData() ;
-  } else {
-	  sendHubData() ;
-  }
+	if (sportAvailable) 
+		sendSportData() ;
+	else 
+		sendHubData() ;
 #endif  
 }
 
@@ -204,12 +213,12 @@ void OXS_OUT::sendData() {
 
 #if defined( PROTOCOL ) &&  ( ( PROTOCOL == FRSKY_SPORT ) || ( PROTOCOL == FRSKY_SPORT_HUB ) )
 
-//volatile uint8_t idToReply ;                                                     // each bit (0..5) reports (set to 1) if oXs has to reply to a pooling on a specific Id (this has been added because oXs has to reply with all 0x00 when he has not yet data available 
-//volatile uint8_t frskyStatus = 0x3F  ;                                                   //Status of SPORT protocol saying if data is to load in work field (bit 0...5 are used for the 6 sensorId), initially all data are to be loaded
-//uint8_t currFieldIdx[6] = { 0 , 2, 5 , 10 , 15 , 19 } ;                          // per sensor, say which field has been loaded the last time (so next time, we have to search from the next one)
-//const uint8_t fieldMinIdx[7]  = { 0 , 2, 5 , 10 , 15 , 19 , 22 } ;                     // per sensor, say the first field index ; there is one entry more in the array to know the last index
-//const uint8_t fieldId[22] = { 0x10 , 0x11 , 0x30 , 0x30 , 0x30 , 0x21 , 0x20 , 0x60 ,0x90, 0x91 , 0x80, 0x80 , 0x82 , 0x83 , 0x84 , 0x50 , 0x40 , 0x41 , 0xA0 , 0x70 , 0x71 , 0x72 } ; //fieldID to send to Tx (to shift 4 bits to left
-//struct ONE_MEASUREMENT * p_measurements[22] ;      // array of 22 pointers (each pointer point to a structure containing a byte saying if a value is available and to the value.
+volatile uint8_t idToReply ;                                                     // each bit (0..5) reports (set to 1) if oXs has to reply to a pooling on a specific Id (this has been added because oXs has to reply with all 0x00 when he has not yet data available 
+volatile uint8_t frskyStatus = 0x3F  ;                                                   //Status of SPORT protocol saying if data is to load in work field (bit 0...5 are used for the 6 sensorId), initially all data are to be loaded
+uint8_t currFieldIdx[6] = { 0 , 2, 5 , 10 , 15 , 19 } ;                          // per sensor, say which field has been loaded the last time (so next time, we have to search from the next one)
+const uint8_t fieldMinIdx[7]  = { 0 , 2, 5 , 10 , 15 , 19 , 22 } ;                     // per sensor, say the first field index ; there is one entry more in the array to know the last index
+const uint8_t fieldId[22] = { 0x10 , 0x11 , 0x30 , 0x30 , 0x30 , 0x21 , 0x20 , 0x60 ,0x90, 0x91 , 0x80, 0x80 , 0x82 , 0x83 , 0x84 , 0x50 , 0x40 , 0x41 , 0xA0 , 0x70 , 0x71 , 0x72 } ; //fieldID to send to Tx (to shift 4 bits to left
+struct ONE_MEASUREMENT * p_measurements[22] ;      // array of 22 pointers (each pointer point to a structure containing a byte saying if a value is available and to the value.
 // There are 20 possible fields to transmit in SPORT                                                                                                                            
 // They are grouped per sensor ID
 // Sensor 0 start from index = 0 and contains Alt + Vspeed
@@ -219,26 +228,21 @@ void OXS_OUT::sendData() {
 // Sensor 4 start from index = 13 and contains rpm, T1, T2, airspeed
 // Sensor 5 start from index = 17 and contains accX , accY, accZ
 
-//int32_t dataValue[6] ;   // keep for each sensor id the next value to be sent
-//uint8_t dataId[6] ;      // keep for each sensor id the Id of next field to be sent
+int32_t dataValue[6] ;   // keep for each sensor id the next value to be sent
+uint8_t dataId[6] ;      // keep for each sensor id the Id of next field to be sent
 //uint8_t sensorSeq  ;
-//uint8_t sensorIsr  ;
+uint8_t sensorIsr;
 
-//struct ONE_MEASUREMENT no_data = { 0, 0 } ; 
+struct ONE_MEASUREMENT no_data = { 0, 0 } ; 
 
 void initMeasurement() {
-// pointer to Altitude
+// pointer to Altitude, VSpeed
 #if defined(VARIO) 
     p_measurements[0] = &oXs_MS5611.varioData.relativeAlt ; // we use always relative altitude in Frsky protocol
+    p_measurements[1] = &mainVspeed ;  
     idToReply |= 0x01 ;
 #else
    p_measurements[0] = &no_data ;
-#endif
-
-// pointer to VSpeed
-#if defined(VARIO)
-    p_measurements[1] = &mainVspeed ;  
-#else
     p_measurements[1] = &no_data ;
 #endif
 
@@ -283,7 +287,9 @@ void initMeasurement() {
 #endif
 
 // pointer to fuel                                    
-#if defined(FUEL_SOURCE) && defined(ARDUINO_MEASURES_VOLTAGES) && (ARDUINO_MEASURES_VOLTAGES == YES)&& ( FUEL_SOURCE == VOLT_1 || FUEL_SOURCE == VOLT_2 || FUEL_SOURCE == VOLT_3 || FUEL_SOURCE == VOLT_4 || FUEL_SOURCE == VOLT_5 || FUEL_SOURCE == VOLT_6 )
+	p_measurements[7] = &sport_consumedMilliAmps;
+	idToReply |= 0x04 ;
+/*#if defined(FUEL_SOURCE) && defined(ARDUINO_MEASURES_VOLTAGES) && (ARDUINO_MEASURES_VOLTAGES == YES)&& ( FUEL_SOURCE == VOLT_1 || FUEL_SOURCE == VOLT_2 || FUEL_SOURCE == VOLT_3 || FUEL_SOURCE == VOLT_4 || FUEL_SOURCE == VOLT_5 || FUEL_SOURCE == VOLT_6 )
     p_measurements[7] =  &oXs_Voltage.voltageData.mVolt[FUEL_SOURCE - VOLT_1];
     idToReply |= 0x04 ;
 #elif defined(FUEL_SOURCE) && defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && ( FUEL_SOURCE == ADS_VOLT_1 || FUEL_SOURCE == ADS_VOLT_2 || FUEL_SOURCE == ADS_VOLT_3 || FUEL_SOURCE == ADS_VOLT_4 )
@@ -291,7 +297,7 @@ void initMeasurement() {
     idToReply |= 0x04 ; 
 #else
     p_measurements[7] = &no_data ;
-#endif
+#endif*/
 
 // pointer to A3                                    
 #if defined(A3_SOURCE) && defined(ARDUINO_MEASURES_VOLTAGES) && (ARDUINO_MEASURES_VOLTAGES == YES) && ( A3_SOURCE == VOLT_1 || A3_SOURCE == VOLT_2 || A3_SOURCE == VOLT_3 || A3_SOURCE == VOLT_4 || A3_SOURCE == VOLT_5 || A3_SOURCE == VOLT_6 )
@@ -316,43 +322,28 @@ void initMeasurement() {
 #endif
 
 
-// pointer to GPS lon
-#if defined(GPS_INSTALLED)
+// pointer to GPS
+/*#if defined(GPS_INSTALLED)
   p_measurements[10] = &sport_gps_lon ;
-  idToReply |= 0x08 ; 
-#else
-  p_measurements[10] = &no_data ; 
-#endif
-
-// pointer to GPS lat
-#if defined(GPS_INSTALLED)
   p_measurements[11] = &sport_gps_lat ; 
-#else
-  p_measurements[11] = &no_data ; 
-#endif
-
-// pointer to GPS alt
-#if defined(GPS_INSTALLED)
   p_measurements[12] = &sport_gps_alt ; 
-#else
-  p_measurements[12] = &no_data ; 
-#endif
-
-// pointer to GPS speed
-#if defined(GPS_INSTALLED)
   p_measurements[13] = &sport_gps_speed ; 
-#else
-  p_measurements[13] = &no_data ; 
-#endif
-
-// pointer to GPS course
-#if defined(GPS_INSTALLED)
   p_measurements[14] = &sport_gps_course ; 
-#else
+  idToReply |= 0x08 ; 
+#else*/
+  p_measurements[10] = &no_data ; 
+  p_measurements[11] = &no_data ; 
+  p_measurements[12] = &no_data ; 
+  p_measurements[13] = &no_data ; 
   p_measurements[14] = &no_data ; 
-#endif
+//#endif
+
 
 // pointer to RPM
+
+/*#if ( defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES) )
+    p_measurements[15] = &sport_consumedMilliAmps;
+	idToReply |= 0x10 ; */
 #if defined(MEASURE_RPM) 
   p_measurements[15] = &sport_rpm ; 
   idToReply |= 0x10 ;
@@ -361,6 +352,10 @@ void initMeasurement() {
 #endif
 
 // pointer to T1
+/*#if ( defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES) )
+    p_measurements[16] = &sport_consumedMilliAmps;
+	idToReply |= 0x10 ; 
+#elif*/
 #if defined(T1_SOURCE) && ( T1_SOURCE == TEST_1)
    p_measurements[16] = &test1 ;
    idToReply |= 0x10 ; 
@@ -429,9 +424,7 @@ void initMeasurement() {
 #else
    p_measurements[17] = &no_data ; // T2 
 #endif
-
-
-   
+  
 // pointer to airspeed
 #if defined(AIRSPEED) 
   p_measurements[18] = &oXs_4525.airSpeedData.airSpeed ;
@@ -596,25 +589,28 @@ void OXS_OUT::sendSportData()
 #endif
 
 #if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)  
-    if ( oXs_Current.currentData.milliAmps.available) {
-      oXs_Current.currentData.milliAmps.available = false ; 
-      sport_currentData.value = oXs_Current.currentData.milliAmps.value  / 100 ;
-      sport_currentData.available = true ;
+    if ( oXs_Current.currentData.milliAmps.available) 
+	{
+		oXs_Current.currentData.milliAmps.available = false ; 
+		sport_currentData.value = oXs_Current.currentData.milliAmps.value  / 100 ;
+		sport_currentData.available = true ;
     }  
-    if ( oXs_Current.currentData.consumedMilliAmps.available) {
-      oXs_Current.currentData.consumedMilliAmps.available = false ; 
-      sport_currentData.value = oXs_Current.currentData.milliAmps.value  / 100 ;
-      sport_currentData.available = true ;
+    if ( oXs_Current.currentData.consumedMilliAmps.available) 
+	{
+		oXs_Current.currentData.consumedMilliAmps.available = false ; 
+		sport_consumedMilliAmps.value = oXs_Current.currentData.consumedMilliAmps.value;
+		sport_consumedMilliAmps.available = true ;
     }  
-#elif defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)
-    if ( oXs_ads1115.adsCurrentData.milliAmps.available ) {
-      oXs_ads1115.adsCurrentData.milliAmps.available = false ;
-      sport_currentData.value = oXs_ads1115.adsCurrentData.milliAmps.value  / 100 ;
-      sport_currentData.available = true ;
-    }  
+/*#elif defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)
+    if ( oXs_ads1115.adsCurrentData.milliAmps.available ) 
+	{
+		oXs_ads1115.adsCurrentData.milliAmps.available = false ;
+		sport_currentData.value = oXs_ads1115.adsCurrentData.milliAmps.value  / 100 ;
+		sport_currentData.available = true ;
+    }  */
 #endif
 
-#if defined(GPS_INSTALLED)
+/*#if defined(GPS_INSTALLED)
   if (GPS_lonAvailable) {
         sport_gps_lon.available = GPS_lonAvailable ;
         GPS_lonAvailable = false ; 
@@ -658,37 +654,43 @@ void OXS_OUT::sendSportData()
             GPS_ground_courseAvailable = false ;
             sport_gps_course.value = GPS_ground_course / 1000;               // convert from degree * 100000 to degree * 100                
   }     
-#endif // end of GPS_INSTALLED
+#endif // end of GPS_INSTALLED*/
 
 //    Serial.print("frskyStatus "); Serial.println(frskyStatus,HEX) ;
-    if ( frskyStatus ) {                                                                                  // if at least one data has to be loaded
-      for (uint8_t sensorSeq = 0 ; sensorSeq < 6 ; sensorSeq++ ) {                                        // for each sensor (currently 6)  
-        if ( frskyStatus & (1 << sensorSeq ) )  {                          //if frskyStatus says that a data must be loaded for this sensor
-            uint8_t currFieldIdx_ = currFieldIdx[sensorSeq] ;                // retrieve the last field being loaded for this sensor
-            for (uint8_t iCount = fieldMinIdx[sensorSeq] ; iCount < fieldMinIdx[sensorSeq+1] ; iCount++ ) {        // we will not seach more than the number of fields for the selected sensor 
-                currFieldIdx_++ ;                                                                          // search with next field
-                if ( currFieldIdx_ >= fieldMinIdx[sensorSeq+1] ) currFieldIdx_ = fieldMinIdx[sensorSeq] ;        // if overlap within sensor range, set idx to first idx for this sensorSeq
-//                Serial.print("currFieldIdx_ "); Serial.print(currFieldIdx_) ; 
-//                Serial.print(" p_m.av "); Serial.print( p_measurements[currFieldIdx_]->available) ;
-//                Serial.print(" p_m.va "); Serial.println( p_measurements[currFieldIdx_]->value) ;
-                if ( p_measurements[currFieldIdx_]->available  ){                                                // if data of current index of sensor is available
-                  p_measurements[currFieldIdx_]->available = 0 ;                                                         // mark the data as not available
-                  dataValue[sensorSeq] =  p_measurements[currFieldIdx_]->value ;                                         // store the value in a buffer
-                  dataId[sensorSeq] = fieldId[currFieldIdx_] ;                                                   // mark the data from this sensor as available
-                  uint8_t oReg = SREG ; // save status register
-                  cli() ;
-                  frskyStatus &= ~(1<< sensorSeq) ;                                               // says that data is loaded by resetting one bit
-                  SREG = oReg ; // restore the status register
+	if ( frskyStatus ) 
+	{                                                                                   // if at least one data has to be loaded
+		for (uint8_t sensorSeq = 0 ; sensorSeq < 6 ; sensorSeq++ ) 						// for each sensor (currently 6)  
+		{                                        
+			if ( frskyStatus & (1 << sensorSeq ) )  
+			{                          													//if frskyStatus says that a data must be loaded for this sensor
+				uint8_t currFieldIdx_ = currFieldIdx[sensorSeq] ;                		// retrieve the last field being loaded for this sensor
+				for (uint8_t iCount = fieldMinIdx[sensorSeq] ; iCount < fieldMinIdx[sensorSeq+1] ; iCount++ ) // we will not seach more than the number of fields for the selected sensor 
+				{        
+					currFieldIdx_++ ;                                               	// search with next field
+					if ( currFieldIdx_ >= fieldMinIdx[sensorSeq+1] ) 					// if overlap within sensor range, set idx to first idx for this sensorSeq
+						currFieldIdx_ = fieldMinIdx[sensorSeq] ;        			
+//					Serial.print("currFieldIdx_ "); Serial.print(currFieldIdx_) ; 
+//					Serial.print(" p_m.av "); Serial.print( p_measurements[currFieldIdx_]->available) ;
+//					Serial.print(" p_m.va "); Serial.println( p_measurements[currFieldIdx_]->value) ;
+					if ( p_measurements[currFieldIdx_]->available  )					// if data of current index of sensor is available
+					{                                                
+						p_measurements[currFieldIdx_]->available = 0;               	// mark the data as not available
+						dataValue[sensorSeq] =  p_measurements[currFieldIdx_]->value;	// store the value in a buffer
+						dataId[sensorSeq] = fieldId[currFieldIdx_] ;                	// mark the data from this sensor as available
+						uint8_t oReg = SREG ; 											// save status register
+						cli() ;
+						frskyStatus &= ~(1<< sensorSeq) ;                           	// says that data is loaded by resetting one bit
+						SREG = oReg ; 													// restore the status register
 #ifdef DEBUG_LOAD_SPORT
-                  Serial.print("Load "); Serial.print(dataId[sensorSeq],HEX) ; Serial.print(" ") ; Serial.println(dataValue[sensorSeq]);
+						Serial.print("Load "); Serial.print(dataId[sensorSeq],HEX) ; Serial.print(" ") ; Serial.println(dataValue[sensorSeq]);
 #endif                  
-                  break ;                                                                         // exit inner for
-                }            
-            }     
-            currFieldIdx[sensorSeq] = currFieldIdx_   ;                                            // save currentFieldIdx for this 
-        }
-      } // End for one sensorSeq 
-    }   // End of if (frskystatus)
+						break ;                                                     	// exit inner for
+					}            
+				}     
+				currFieldIdx[sensorSeq] = currFieldIdx_;                            	// save currentFieldIdx for this 
+			}
+		} 
+	}
 #ifdef DEBUG_SPORT_RECEIVED
                   Serial.print("RcvCnt "); Serial.println( sportRcvCount) ;
 #endif
@@ -709,21 +711,21 @@ void OXS_OUT::sendHubData()  // for Hub protocol
   static uint16_t lastFrameLength ;
   static uint32_t temp ;
   static uint8_t countFrame1 = FRAME2_EVERY_N_FRAME1 ;
-#ifdef GPS_INSTALLED  
+/*#ifdef GPS_INSTALLED  
   //static uint32_t lastMsFrame2=0;
   
-#endif
+#endif*/
   
   temp = millis() ;
   if ( (state == IDLE ) && (temp  >  (lastMsFrame1 + ( lastFrameLength * MSEC_PER_BYTE) ) ) ) {
-#ifdef GPS_INSTALLED
+/*#ifdef GPS_INSTALLED
       if ( (countFrame1 == 0 ) && GPS_fix ) {
           SendFrame2();
           lastFrameLength = hubMaxData ;
           countFrame1 = FRAME2_EVERY_N_FRAME1 ;
           lastMsFrame1=temp; 
       } else 
-#endif
+#endif*/
       {
           SendFrame1();
           lastFrameLength = hubMaxData ;
@@ -755,7 +757,8 @@ void OXS_OUT::sendHubData()  // for Hub protocol
 }  // end sendData Hub protocol
 
 //======================================================================================================Send Frame 1A via serial
-void OXS_OUT::SendFrame1(){
+void OXS_OUT::SendFrame1()
+{
   hubMaxData = 0 ; // reset of number of data to send
 
 // pointer to Altitude
@@ -814,16 +817,17 @@ void OXS_OUT::SendFrame1(){
 // current
 #if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
     SendValue( FRSKY_USERDATA_CURRENT,  (int16_t) ( oXs_Current.currentData.milliAmps.value / 100 ) ) ;
-	SendValue( FRSKY_USERDATA_RPM,      (int16_t) ( oXs_Current.currentData.consumedMilliAmps.value  ) ) ; 
 #elif defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && defined(ADS_CURRENT_BASED_ON)
     SendValue( FRSKY_USERDATA_CURRENT,  (int16_t) ( oXs_ads1115.adsCurrentData.milliAmps.value / 100 ) ) ;
 #elif defined(EAGLETREE_CONNECTED) && (EAGLETREE_CONNECTED == YES)
 	SendValue( FRSKY_USERDATA_CURRENT,  (int16_t) ( oXs_EagleTree.currentData.milliAmps.value / 100 ) ) ;
-    SendValue( FRSKY_USERDATA_RPM,      (int16_t) ( sport_rpm.value ) ) ; 
+    SendValue( FRSKY_USERDATA_RP M,      (int16_t) ( sport_rpm.value ) ) ; 
 #endif
 
 // fuel                                     
-#if defined(FUEL_SOURCE) && defined(ARDUINO_MEASURES_VOLTAGES) && (ARDUINO_MEASURES_VOLTAGES == YES) && ( FUEL_SOURCE == VOLT_1 || FUEL_SOURCE == VOLT_2 || FUEL_SOURCE == VOLT_3 || FUEL_SOURCE == VOLT_4 || FUEL_SOURCE == VOLT_5 || FUEL_SOURCE == VOLT_6 )
+#if defined(ARDUINO_MEASURES_A_CURRENT) && (ARDUINO_MEASURES_A_CURRENT == YES)
+	SendValue( FRSKY_USERDATA_FUEL,      (int16_t) ( oXs_Current.currentData.consumedMilliAmps.value  ) ) ; 
+#elif defined(FUEL_SOURCE) && defined(ARDUINO_MEASURES_VOLTAGES) && (ARDUINO_MEASURES_VOLTAGES == YES) && ( FUEL_SOURCE == VOLT_1 || FUEL_SOURCE == VOLT_2 || FUEL_SOURCE == VOLT_3 || FUEL_SOURCE == VOLT_4 || FUEL_SOURCE == VOLT_5 || FUEL_SOURCE == VOLT_6 )
     SendValue(FRSKY_USERDATA_FUEL,  (int16_t)  voltageData->mVolt[FUEL_SOURCE - VOLT_1].value ) ;
 #elif defined(VFAS_SOURCE) && defined(AN_ADS1115_IS_CONNECTED) && (AN_ADS1115_IS_CONNECTED == YES ) && defined(ADS_MEASURE) && ( (FUEL_SOURCE == ADS_VOLT_1) || (FUEL_SOURCE == ADS_VOLT_2) || (FUEL_SOURCE == ADS_VOLT_3) || (FUEL_SOURCE == ADS_VOLT_4)  )
     SendValue( FRSKY_USERDATA_FUEL ,  (int16_t) (ads_Conv[FUEL_SOURCE - ADS_VOLT_1 ].value ) ) ; 
@@ -961,17 +965,19 @@ void OXS_OUT::SendFrame1(){
     SendValue( FRSKY_USERDATA_ACC_Z ,  (int16_t) (ads_Conv[ACCZ_SOURCE - ADS_VOLT_1 ].value ) ) ; 
 #endif
 
-  if( hubMaxData > 0 ) {
-    sendHubByte(0x5E) ; // End of Frame 1!
-    setHubNewData(  ) ;
-  }  
+	if( hubMaxData > 0 ) 
+	{
+		sendHubByte(0x5E) ; // End of Frame 1!
+		setHubNewData(  ) ;
+	}  
 #ifdef DEBUGHUBPROTOCOL
-      printer->print(F("Frame 1 to send: "));
-      for (int cntPrint = 0 ; cntPrint < hubData.maxData ; cntPrint++) {
-        printer->print(" ");
-        printer->print(hubData.data[cntPrint] , HEX);
-      }
-     printer->println(" "); 
+	printer->print(F("Frame 1 to send: "));
+	for (int cntPrint = 0 ; cntPrint < hubData.maxData ; cntPrint++) 
+	{
+		printer->print(" ");
+		printer->print(hubData.data[cntPrint] , HEX);
+	}
+	printer->println(" "); 
 #endif  
 }  // end send frame 1
 
@@ -991,9 +997,9 @@ void OXS_OUT::SendFrame1(){
 #define FRSKY_USERDATA_GPS_DIST     0x3C
 
 
-#ifdef GPS_INSTALLED
+/*#ifdef GPS_INSTALLED
 //======================================================================================================Send Frame 2 via serial used for GPS
-/*void OXS_OUT::_SendFrame2(){
+void OXS_OUT::_SendFrame2(){
   static uint8_t hubGpsCount ;
   uint32_t absLongLat ;
   uint32_t decimalPartOfDegree ;
@@ -1050,29 +1056,33 @@ void OXS_OUT::SendFrame1(){
      printer->println(" "); 
 #endif
   
-}*/
-#endif // end of GPS_INSTALLED
+}
+#endif // end of GPS_INSTALLED*/
 
 
 // ******************************************************** //
 // SendValue => send a value as frsky sensor hub data       //
 // ******************************************************** //
-void OXS_OUT::SendValue(uint8_t ID, uint16_t Value) {
-  uint8_t tmp1 = Value & 0x00ff;
-  uint8_t tmp2 = (Value & 0xff00)>>8;
-  sendHubByte(0x5E) ;
-  sendHubByte(ID);
+void OXS_OUT::SendValue(uint8_t ID, uint16_t Value) 
+{
+	uint8_t tmp1 = Value & 0x00ff;
+	uint8_t tmp2 = (Value & 0xff00)>>8;
+	sendHubByte(0x5E) ;
+	sendHubByte(ID);
 
-  if ( (tmp1 == 0x5E) || (tmp1 == 0x5D) ){ 
-	      tmp1 ^= 0x60 ;
-        sendHubByte(0x5D);
-  }
-  sendHubByte(tmp1);  
-  if ( (tmp2 == 0x5E) || (tmp2 == 0x5D) ){ 
-	      tmp2 ^= 0x60 ;
-        sendHubByte(0x5D);
-  }
-  sendHubByte(tmp2);
+	if ( (tmp1 == 0x5E) || (tmp1 == 0x5D) )
+	{ 
+		tmp1 ^= 0x60 ;
+		sendHubByte(0x5D);
+	}
+	sendHubByte(tmp1);  
+	
+	if ( (tmp2 == 0x5E) || (tmp2 == 0x5D) )
+	{ 
+		tmp2 ^= 0x60 ;
+		sendHubByte(0x5D);
+	}
+	sendHubByte(tmp2);
 }
 
 //***************************************************
@@ -1366,7 +1376,8 @@ void OXS_OUT::loadHubValueToSend( uint8_t currentFieldToSend ) {
 // ********************************************************** //
 // SendCellVoltage => send a cell voltage                     //
 // ********************************************************** //
-void OXS_OUT::SendCellVoltage( uint32_t voltage) {
+void OXS_OUT::SendCellVoltage( uint32_t voltage) 
+{
   // For SPORT, cell voltage is formatted as (hex) 12 34 56 78 where 123 = volt of cell n+1 (divided by 2), 456 idem for cell n, 7 = max number of cell and 8 = n (number of cell)
   // target format for Hub (hex) is having 2 data sent in format : 84 56 and 91 23 (where 9 = content of 8 incresed by 1)
     byte cellID = (voltage & 0x0000000f);
@@ -1376,7 +1387,8 @@ void OXS_OUT::SendCellVoltage( uint32_t voltage) {
     uint16_t Value = (v2<<8) | (v1 & 0x00ff) ;
     SendValue(FRSKY_USERDATA_CELL_VOLT, Value);
     cellID++;
-    if (cellID < NUMBEROFCELLS) {
+    if (cellID < NUMBEROFCELLS) 
+	{
         cellVolt = (voltage & 0xfff00000) >> 20 ;
         uint8_t v1 = ( (cellID )<<4 & 0xf0) | ((cellVolt & 0x0f00)>>8) ;
         uint8_t v2 = (cellVolt & 0x00ff);
@@ -1704,7 +1716,7 @@ ISR(TIMER1_COMPA_vect)
                                 sensorIsr = 128 ;  
                             }
                             if ( ( sensorIsr < 6 ) && ( idToReply & (1 << sensorIsr ) ) ) { // If this sensor ID is supported by oXs and it has been configured in order to send some data
-                              if  ( ( frskyStatus & ( 1 << sensorIsr ) ) == 0 )  {    // If this sensor ID is supported by oXs and oXs has prepared data to reply data in dataValue[] for this sensorSeq    
+                              if  ( ( frskyStatus & ( 1 << sensorIsr ) ) == 0 )  {          // If this sensor ID is supported by oXs and oXs has prepared data to reply data in dataValue[] for this sensorSeq    
                                      // if ( sportDataLock == 0 ) {
                                           TxSportData[0] = 0x10 ;
                                           TxSportData[1] = dataId[sensorIsr] << 4  ;
@@ -1916,6 +1928,7 @@ void initSportUart(  )           //*************** initialise UART pour SPORT
 #endif
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 // ! \brief  External interrupt service routine.  ********************
 //  Interrupt on Pin Change to detect change on level on SPORT signal (= could be a start bit)
 //
@@ -1995,27 +2008,31 @@ void initHubUart( )
 #endif
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void setHubNewData(  )
 {
-  if ( (TxCount == 0) && (hubMaxData > 0) ) {
-//    for (int cntNewData = 0 ; cntNewData < hubMaxData ; cntNewData++) {
-//          TxHubData[cntNewData] = hubData[cntNewData] ;
-//      }
-//      TxMax = hubMaxData  ;
+	if ( (TxCount == 0) && (hubMaxData > 0) ) 
+	{
+		//    for (int cntNewData = 0 ; cntNewData < hubMaxData ; cntNewData++) {
+		//          TxHubData[cntNewData] = hubData[cntNewData] ;
+		//      }
+		//      TxMax = hubMaxData  ;
 #ifdef DEBUGSETNEWDATA
-          Serial.print("set new data at ");
-          Serial.print( millis() );
-          Serial.print(" ");  
-          for (int cntNewData = 0 ; hubMaxData ; cntNewData++) {
-            Serial.print( hubData[cntNewData] , HEX );
-            Serial.print(" ");
-          }
-          Serial.println(" ");        
+		Serial.print("set new data at ");
+		Serial.print( millis() );
+		Serial.print(" ");  
+		for (int cntNewData = 0 ; hubMaxData ; cntNewData++) 
+		{
+			Serial.print( hubData[cntNewData] , HEX );
+			Serial.print(" ");
+		}
+		Serial.println(" ");        
 #endif          
-      startHubTransmit() ;
-  }    
+		startHubTransmit() ;
+	}    
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void startHubTransmit()
 {
   if ( state != IDLE )

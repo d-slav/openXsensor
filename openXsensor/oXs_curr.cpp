@@ -51,10 +51,11 @@ OXS_CURRENT::OXS_CURRENT(uint8_t pinCurrent)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void OXS_CURRENT::setupCurrent( )
 {
+	float value;
+	
 	for(int i = 0; i < TAB_ROWS; i++)
 	{
 		uint8_t pos = i * (EE_CURRENT_AD_VALUE_1 - EE_CURRENT_AD_VALUE_0);
-		float value;
 		EEPROM_readAnything(EE_CURRENT_AD_VALUE_0 + pos, value);
 		LinTab[i][0] = value;
 		EEPROM_readAnything(EE_CURRENT_CURRENT_0 + pos, value); 
@@ -63,7 +64,12 @@ void OXS_CURRENT::setupCurrent( )
 		if(i >= 1)
 			  LinTab[i-1][2] = (LinTab[i][1] - LinTab[i-1][1]) / (LinTab[i][0] - LinTab[i-1][0]);
 	}
-	
+
+	EEPROM_readAnything(EE_TEMP_CORRECTION, value); // cas korekce (vetsi cislo = mensi cas)
+	TempCorrTime = 1.0 - value;
+	EEPROM_readAnything(EE_TEMP_CORR_COEF, value); 	// velikost korekce
+	TempCorrKoef = value * TempCorrTime;		
+
 	for(int i = 0; i < TAB_ROWS; i++)
 	{
 		printer->print("Pos = ");
@@ -76,8 +82,6 @@ void OXS_CURRENT::setupCurrent( )
 		printer->println(LinTab[i][2], 3);
 	}
 	
-	//ad_value_cnt = 0;
-
 	currentData.milliAmps.available = false;
 	currentData.consumedMilliAmps.available = false;
 
@@ -88,8 +92,8 @@ void OXS_CURRENT::setupCurrent( )
 	floatConsumedMilliAmps=0;
 }
 
-#define TEMP_CORRECTION 0.009						// cas korekce (vetsi cislo = mensi cas)
-#define TEMP_CORR_FCOEF (3.8E-5 * TEMP_CORRECTION)	// velikost korekce
+//#define TEMP_CORRECTION 0.009						// cas korekce (vetsi cislo = mensi cas)
+//#define TEMP_CORR_FCOEF (3.8E-5 * TEMP_CORRECTION)	// velikost korekce
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void OXS_CURRENT::readSensor() 
@@ -111,7 +115,7 @@ void OXS_CURRENT::readSensor()
   
 	if(  ( milliTmp - lastCurrentMillis) > 200) 
 	{
-		TempCorrection = TempCorrection * (1.0-TEMP_CORRECTION) + (AD_curr * AD_curr * TEMP_CORR_FCOEF);
+		TempCorrection = TempCorrection * TempCorrTime + (AD_curr * AD_curr * TempCorrKoef);
 		filtered = GetCurrent(AD_curr - TempCorrection);
 		currentData.milliAmps.value = filtered;
 		currentData.milliAmps.available = true ;

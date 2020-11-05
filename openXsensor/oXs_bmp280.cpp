@@ -56,10 +56,10 @@ void OXS_BMP280::setup() {
 
   
 #ifdef DEBUG
-  printer->print(F("Vario Sensor:BMP280 "));
-  printer->println(" ");
-  printer->print(F(" milli="));  
-  printer->println(millis());
+  printer->println(F("Vario Sensor:BMP280"));
+//  printer->println(" ");
+//  printer->print(F(" milli="));  
+//  printer->println(millis());
 
 #endif
   

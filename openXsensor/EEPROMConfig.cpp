@@ -36,14 +36,13 @@ void EEPROMConfig_char(int c)
 {
 	switch(c)
 	{
-		case 'r':
+		//case 'r':
 		case 'R':
-		case 'w':
+		//case 'w':
 		case 'W':
-		case 'v':
+		//case 'v':
 		case 'V':
 		case 'I':
-		case 'C':
 			cmd = c;
 			buf_cnt = 0;
 			memset(buffer, 0, sizeof(buffer));
@@ -62,7 +61,8 @@ void EEPROMConfig_char(int c)
 		case '8':
 		case '9':
 		case '.':
-		case ',':		
+		case ',':
+		case 'E':		
 			if(buf_cnt < (sizeof(buffer)-1))
 			{
 				if(c == ',')
@@ -81,22 +81,18 @@ void EEPROMConfig_char(int c)
 					Serial.print(F("reg "));
 					Serial.print(reg);
 					Serial.print(F(" = "));
-					Serial.println(value);
+					Serial.println(value, 7);
 					break;
 					
 				case 'W':
 					reg = atoi(buffer);
 					EEPROM_writeAnything(reg, value);
-					if(reg == EE_VOLTAGE_RESISTOR_TO_GROUND	|| reg == EE_VOLTAGE_RESISTOR_TO_VOLTAGE || reg == EE_VOLTAGE_OFFSET_VOLTAGE || reg == EE_VOLTAGE_SCALE_VOLTAGE)
-						oXs_Voltage.setupVoltage(); 
-					/*else if(reg == EE_CURRENT_MVOLT_AT_ZERO_AMP || reg == EE_CURRENT_MVOLT_PER_AMP || reg == EE_CURRENT_SCALE_CURRENT)
-						oXs_Current.setupCurrent();*/
 					break;
 					
-				case 'v':
+				/*case 'v':
 					i_value = atoi(buffer);
 					Serial.print(F("set value = "));
-					Serial.println(value);
+					Serial.println(value);*/
 					
 				case 'V':
 					value = atof(buffer);
@@ -112,11 +108,6 @@ void EEPROMConfig_char(int c)
 					case 1: oXs_Current.setupCurrent(); break;
 					}
 					break;
-					
-				/*case 'C':
-					reg = atoi(buffer);
-					oXs_Current.setCurrentTabStart(reg, value);
-					break;*/
 			}
 		
 		break;
